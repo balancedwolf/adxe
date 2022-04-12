@@ -1,18 +1,18 @@
 /****************************************************************************
  Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
- 
- http://www.cocos2d-x.org
- 
+
+ https://adxeproject.github.io/
+
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
  in the Software without restriction, including without limitation the rights
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions:
- 
+
  The above copyright notice and this permission notice shall be included in
  all copies or substantial portions of the Software.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,14 +27,13 @@
 
 #include "ExtensionMacros.h"
 
-
-#include "GUI/CCControlExtension/CCControlExtensions.h"
-#include "GUI/CCScrollView/CCScrollView.h"
-#include "GUI/CCScrollView/CCTableView.h"
-
 // Physics integration
 #include "physics-nodes/CCPhysicsDebugNode.h"
+#include "physics-nodes/CCPhysicsDebugNodeBox2D.h"
+#include "physics-nodes/CCPhysicsDebugNodeChipmunk2D.h"
 #include "physics-nodes/CCPhysicsSprite.h"
+#include "physics-nodes/CCPhysicsSpriteBox2D.h"
+#include "physics-nodes/CCPhysicsSpriteChipmunk2D.h"
 
 #include "assets-manager/AssetsManager.h"
 #include "assets-manager/AssetsManagerEx.h"

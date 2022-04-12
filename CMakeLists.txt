@@ -2,8 +2,9 @@
 # Copyright (c) 2013 cocos2d-x.org
 # Copyright (c) 2014 martell malone
 # Copyright (c) 2015-2017 Chukong Technologies Inc.
+# Copyright (c) 2021 Bytedance Inc.
 #
-# http://www.cocos2d-x.org
+# https://adxe.org
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -26,20 +27,17 @@
 
 # build engine library and all tests
 
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.10)
 
-project(Cocos2d-x)
+project(adxe)
 
-# set default minimum deployment target
 if(XCODE)
-    if(NOT DEFINED CMAKE_XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET)
-        SET (CMAKE_XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET 8.0)
-    endif()
+    set(CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY TRUE)
 endif()
 
-# cocos2dx root path
-set(COCOS2DX_ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-set(CMAKE_MODULE_PATH ${COCOS2DX_ROOT_PATH}/cmake/Modules/)
+# adxe root path
+set(ADXE_ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+set(CMAKE_MODULE_PATH ${ADXE_ROOT_PATH}/cmake/Modules/)
 
 # prevent in-source-build
 include(PreventInSourceBuilds)
@@ -47,22 +45,30 @@ include(PreventInSourceBuilds)
 # works before build libcocos2d
 include(CocosBuildSet)
 
-set(BUILD_LUA_LIBS ON) 
+option(AX_BUILD_TESTS "Build cpp & lua tests" ON)
 
-add_subdirectory(${COCOS2DX_ROOT_PATH}/cocos ${ENGINE_BINARY_PATH}/cocos/core)
+set(AX_ENABLE_EXT_LUA ON) 
 
-# prevent tests project to build "cocos2d-x/cocos" again
+add_subdirectory(${ADXE_ROOT_PATH}/core ${ENGINE_BINARY_PATH}/adxe/core)
+
+# prevent tests project to build "adxe/core" again
 set(BUILD_ENGINE_DONE ON)
 
-# add cpp tests default
-add_subdirectory(${COCOS2DX_ROOT_PATH}/tests/cpp-empty-test ${ENGINE_BINARY_PATH}/tests/cpp-empty-test)
-add_subdirectory(${COCOS2DX_ROOT_PATH}/tests/cpp-tests ${ENGINE_BINARY_PATH}/tests/cpp-tests)
+if(AX_BUILD_TESTS)
+    # add cpp-template-default into project(adxe) for tmp test
+    add_subdirectory(${ADXE_ROOT_PATH}/templates/cpp-template-default ${ENGINE_BINARY_PATH}/tests/HelloCpp)
+	
+	# add cpp tests default
+    add_subdirectory(${ADXE_ROOT_PATH}/tests/cpp-tests ${ENGINE_BINARY_PATH}/tests/cpp-tests)
+    
+	# add fairygui tests when fairygui extension is enabled
+    if(AX_ENABLE_EXT_FAIRYGUI)
+      add_subdirectory(${ADXE_ROOT_PATH}/tests/fairygui-tests ${ENGINE_BINARY_PATH}/tests/fairygui-tests)
+    endif()
 
-if(BUILD_LUA_LIBS)
-  add_subdirectory(${COCOS2DX_ROOT_PATH}/tests/lua-empty-test/project ${ENGINE_BINARY_PATH}/tests/lua-empty-test)
-  add_subdirectory(${COCOS2DX_ROOT_PATH}/tests/lua-tests/project ${ENGINE_BINARY_PATH}/tests/lua-test)
-endif(BUILD_LUA_LIBS)
+    if(AX_ENABLE_EXT_LUA)
+      add_subdirectory(${ADXE_ROOT_PATH}/templates/lua-template-default ${ENGINE_BINARY_PATH}/tests/HelloLua)
+      add_subdirectory(${ADXE_ROOT_PATH}/tests/lua-tests/project ${ENGINE_BINARY_PATH}/tests/lua-test)
+    endif(AX_ENABLE_EXT_LUA)
 
-# add cpp-template-default into project(Cocos2d-x) for tmp test
-add_subdirectory(${COCOS2DX_ROOT_PATH}/templates/cpp-template-default ${ENGINE_BINARY_PATH}/tests/HelloCpp)
-
+endif()

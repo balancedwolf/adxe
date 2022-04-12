@@ -17,7 +17,7 @@ function(cocos_copy_target_res cocos_target)
         get_filename_component(link_folder_abs ${opt_LINK_TO} ABSOLUTE)
         add_custom_command(TARGET SYNC_RESOURCE-${cocos_target} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E echo "    copying to ${link_folder_abs}"
-            COMMAND ${PYTHON_COMMAND} ARGS ${COCOS2DX_ROOT_PATH}/cmake/scripts/sync_folder.py
+            COMMAND ${PYTHON_COMMAND} ARGS ${ADXE_ROOT_PATH}/cmake/scripts/sync_folder.py
                 -s ${cc_folder} -d ${link_folder_abs}
         )
     endforeach()
@@ -49,21 +49,19 @@ function(cocos_copy_lua_scripts cocos_target src_dir dst_dir)
     endif()
     if(MSVC)
         add_custom_command(TARGET ${luacompile_target} POST_BUILD
-            COMMAND ${PYTHON_COMMAND} ARGS ${COCOS2DX_ROOT_PATH}/cmake/scripts/sync_folder.py
-                -s ${src_dir} -d ${dst_dir} -l ${LUAJIT32_COMMAND} -m $<CONFIG>
+            COMMAND ${PYTHON_COMMAND} ARGS ${ADXE_ROOT_PATH}/cmake/scripts/sync_folder.py
+                -s ${src_dir} -d ${dst_dir} -m $<CONFIG>
         )
     else()
         if("${CMAKE_BUILD_TYPE}" STREQUAL "")
             add_custom_command(TARGET ${luacompile_target} POST_BUILD
-                COMMAND ${PYTHON_COMMAND} ARGS ${COCOS2DX_ROOT_PATH}/cmake/scripts/sync_folder.py
+                COMMAND ${PYTHON_COMMAND} ARGS ${ADXE_ROOT_PATH}/cmake/scripts/sync_folder.py
                 -s ${src_dir} -d ${dst_dir}
             )
         else()
             add_custom_command(TARGET ${luacompile_target} POST_BUILD
-                COMMAND ${PYTHON_COMMAND} ARGS ${COCOS2DX_ROOT_PATH}/cmake/scripts/sync_folder.py
-                    -s ${src_dir} -d ${dst_dir} -l ${LUAJIT32_COMMAND} -m ${CMAKE_BUILD_TYPE}
-                COMMAND ${PYTHON_COMMAND} ARGS ${COCOS2DX_ROOT_PATH}/cmake/scripts/sync_folder.py
-                    -s ${src_dir} -d ${dst_dir}/64bit -l ${LUAJIT64_COMMAND} -m ${CMAKE_BUILD_TYPE}
+                COMMAND ${PYTHON_COMMAND} ARGS ${ADXE_ROOT_PATH}/cmake/scripts/sync_folder.py
+                    -s ${src_dir} -d ${dst_dir} -m ${CMAKE_BUILD_TYPE}
             )
         endif()
     endif()
@@ -128,6 +126,7 @@ function(search_depend_libs_recursive cocos_target all_depends_out)
             break()
         endif()
     endwhile(true)
+    list(REMOVE_DUPLICATES all_depends_inner)
     set(${all_depends_out} ${all_depends_inner} PARENT_SCOPE)
 endfunction()
 
@@ -149,8 +148,51 @@ function(get_target_depends_ext_dlls cocos_target all_depend_dlls_out)
             endif()
         endif()
     endforeach()
-
+    list(REMOVE_DUPLICATES all_depend_ext_dlls)
     set(${all_depend_dlls_out} ${all_depend_ext_dlls} PARENT_SCOPE)
+endfunction()
+
+function(copy_thirdparty_dlls cocos_target destDir)
+    # init dependency list with direct dependencies
+    get_property(DEPENDENCIES TARGET ${ADXE_THIRDPARTY_NAME} PROPERTY LINK_LIBRARIES)
+    # We're not intersted in interface link libraries of the top-most target
+#     if (INCLUDE_INTERFACE_LINK_LIBRARIES)
+#        get_property(INTERFACE_LINK_LIBRARIES TARGET ${ADXE_THIRDPARTY_NAME} PROPERTY
+#   INTERFACE_LINK_LIBRARIES)
+#        list(APPEND DEPENDENCIES ${INTERFACE_LINK_LIBRARIES})
+#     endif()
+
+    if(AX_ENABLE_EXT_LUA)
+        list(APPEND DEPENDENCIES ${LUA_ENGINE})
+        list(APPEND DEPENDENCIES tolua)
+    endif()
+
+    if (DEPENDENCIES)
+      list(REMOVE_DUPLICATES DEPENDENCIES)
+      # message (STATUS "${LIB} dependens on ${DEPENDENCIES}")
+    endif()
+
+    SET(EXT_LIB_FILES "")
+ 
+    foreach(DEPENDENCY ${DEPENDENCIES})
+      # message(STATUS ${DEPENDENCY} " depends by ${ADXE_THIRDPARTY_NAME}")
+      get_property(IMPORTLIB TARGET ${DEPENDENCY} PROPERTY IMPORTED_IMPLIB)
+      get_property(IMPORTDLL TARGET ${DEPENDENCY} PROPERTY IMPORTED_LOCATION)
+      if(IMPORTLIB)
+          # message(STATUS "${DEPENDENCY} have import lib ${IMPORTLIB}")
+          list(APPEND EXT_LIB_FILES ${IMPORTLIB})
+      endif()
+      if(IMPORTDLL)
+          list(APPEND EXT_LIB_FILES ${IMPORTDLL})
+      endif()
+    endforeach()
+
+    message(STATUS "EXT_LIB_FILES=${EXT_LIB_FILES}")
+    add_custom_command(TARGET ${cocos_target}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${EXT_LIB_FILES}
+        ${destDir} # ${CMAKE_BINARY_DIR}/lib/$<CONFIG>
+    )
 endfunction()
 
 # copy the `cocos_target` needed dlls into TARGET_FILE_DIR
@@ -167,6 +209,31 @@ function(cocos_copy_target_dll cocos_target)
             COMMAND ${CMAKE_COMMAND} -E copy_if_different ${cc_dll_file} "$<TARGET_FILE_DIR:${cocos_target}>/${cc_dll_name}"
         )
     endforeach()
+
+    # copy thirdparty dlls to target bin dir
+    # copy_thirdparty_dlls(${cocos_target} $<TARGET_FILE_DIR:${cocos_target}>)
+    add_custom_command(TARGET ${cocos_target} POST_BUILD
+       COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_BINARY_DIR}/bin/\$\(Configuration\)/OpenAL32.dll"
+         $<TARGET_FILE_DIR:${cocos_target}>)
+
+    # Copy windows angle binaries
+    add_custom_command(TARGET ${cocos_target} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${ADXE_ROOT_PATH}/${ADXE_THIRDPARTY_NAME}/angle/prebuilt/${ARCH_ALIAS}/libGLESv2.dll
+        ${ADXE_ROOT_PATH}/${ADXE_THIRDPARTY_NAME}/angle/prebuilt/${ARCH_ALIAS}/libEGL.dll
+        ${ADXE_ROOT_PATH}/${ADXE_THIRDPARTY_NAME}/angle/prebuilt/${ARCH_ALIAS}/d3dcompiler_47.dll
+        $<TARGET_FILE_DIR:${cocos_target}>
+    )
+endfunction()
+
+function(cocos_copy_lua_dlls cocos_target)
+    if(NOT AX_USE_LUAJIT)
+        add_custom_command(TARGET ${cocos_target} POST_BUILD
+           COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_BINARY_DIR}/bin/\$\(Configuration\)/plainlua.dll"
+             $<TARGET_FILE_DIR:${cocos_target}>)
+    endif()
 endfunction()
 
 # mark `FILES` as resources, files will be put into sub-dir tree depend on its absolute path
@@ -180,8 +247,6 @@ function(cocos_mark_resources)
     endif()
 
     get_filename_component(BASEDIR_ABS ${opt_BASEDIR} ABSOLUTE)
-
-
     foreach(RES_FILE ${opt_FILES} ${opt_UNPARSED_ARGUMENTS})
         get_filename_component(RES_FILE_ABS ${RES_FILE} ABSOLUTE)
         file(RELATIVE_PATH RES ${BASEDIR_ABS} ${RES_FILE_ABS})
@@ -193,29 +258,6 @@ function(cocos_mark_resources)
 
         if(XCODE OR VS)
             string(REPLACE "/" "\\" ide_source_group "${opt_RESOURCEBASE}/${RES_LOC}")
-        endif()
-
-
-        if(XCODE)
-            #file(GLOB_RECURSE DS_FILES "${opt_RESOURCEBASE}/${RES_LOC}/*.DS_Store")
-            #file (REMOVE "${DS_FILES}")
-
-            get_filename_component(OUTPUT_FILE_EXT ${RES_FILE} EXT)
-
-            if("${OUTPUT_FILE_EXT}" STREQUAL ".DS_Store")
-                continue()
-            endif()
-
-            if("${OUTPUT_FILE_EXT}" STREQUAL ".DS_Store")
-                continue()
-            endif()
-        endif()
-
-        if(XCODE)
-            source_group("${ide_source_group}" FILES ${RES_FILE})
-        endif()
-
-        if(VS)
             source_group("${ide_source_group}" FILES ${RES_FILE})
         endif()
     endforeach()
@@ -232,7 +274,7 @@ function(cocos_mark_code_files cocos_target)
         message(STATUS "target ${cocos_target} code group base is: ${root_dir}")
     endif()
 
-    message(STATUS "cocos_mark_code_files: ${cocos_target}")
+    # message(STATUS "cocos_mark_code_files: ${cocos_target}")
 
     get_property(file_list TARGET ${cocos_target} PROPERTY SOURCES)
 
@@ -263,6 +305,15 @@ function(setup_cocos_app_config app_name)
     if(APPLE)
         # output macOS/iOS .app
         set_target_properties(${app_name} PROPERTIES MACOSX_BUNDLE 1)
+        if(IOS AND (NOT ("${CMAKE_OSX_SYSROOT}" MATCHES ".*simulator.*")))
+            set_xcode_property(${APP_NAME} CODE_SIGNING_REQUIRED "YES")
+            set_xcode_property(${APP_NAME} CODE_SIGNING_ALLOWED "YES")
+        else()
+            # By default, explicit disable codesign for macOS PC
+            set_xcode_property(${APP_NAME} CODE_SIGN_IDENTITY "")
+            set_xcode_property(${APP_NAME} CODE_SIGNING_ALLOWED "NO")
+            set_xcode_property(${APP_NAME} CODE_SIGN_IDENTITY "NO")
+        endif()
     elseif(MSVC)
         # visual studio default is Console app, but we need Windows app
         set_property(TARGET ${app_name} APPEND PROPERTY LINK_FLAGS "/SUBSYSTEM:WINDOWS")
@@ -280,6 +331,23 @@ function(setup_cocos_app_config app_name)
         cocos_def_copy_resource_target(${app_name})
     endif()
 
+    if(BUILD_SHARED_LIBS)
+        target_compile_definitions(${app_name} PRIVATE SPINEPLUGIN_API=DLLIMPORT) # spine dll
+    endif()
+    target_link_libraries(${app_name} ${CC_EXTENSION_LIBS})
+
+    if(XCODE AND AX_USE_ALSOFT AND ALSOFT_OSX_FRAMEWORK)
+        # Embedded soft_oal embedded framework
+        # XCODE_LINK_BUILD_PHASE_MODE BUILT_ONLY
+        # ???CMake BUG: XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY works for first app
+        message(STATUS "Embedding framework soft_oal to ${app_name}...")
+        set_target_properties(${app_name} PROPERTIES
+            XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION
+            XCODE_EMBED_FRAMEWORKS OpenAL
+            XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON
+            XCODE_EMBED_FRAMEWORKS_REMOVE_HEADERS_ON_COPY ON
+        )
+    endif()
 endfunction()
 
 # if cc_variable not set, then set it cc_value
@@ -303,8 +371,13 @@ endmacro()
 # custom Xcode property for iOS target
 macro(cocos_config_target_xcode_property cocos_target)
     if(IOS)
-        set_xcode_property(${cocos_target} ENABLE_BITCODE "NO")
-        set_xcode_property(${cocos_target} ONLY_ACTIVE_ARCH "YES")
+        set(real_target)
+        get_property(real_target TARGET ${cocos_target} PROPERTY ALIASED_TARGET)
+        if (NOT real_target)
+            set(real_target ${cocos_target})
+        endif()
+        set_xcode_property(${real_target} ENABLE_BITCODE "NO")
+        set_xcode_property(${real_target} ONLY_ACTIVE_ARCH "YES")
     endif()
 endmacro()
 

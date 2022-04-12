@@ -1,10 +1,10 @@
-fbxconverter version 0.4
+fbxconverter version 0.7
 It is for cocos2d-x after version v3.3
 
 Convert .fbx to .c3t used by cocos2d-x. Thanks to libgdx fbx-conv. We use their code and do some change.
 
 You can get the source code from the address below:
-https://github.com/lvlonggame/cocos2d-x-3rd-party-libs-src 
+https://github.com/cocos2d-x/fbx-conv
 
 USAGE:
 

@@ -1,0 +1,102 @@
+name: pull_request
+
+on:
+  pull_request:
+    paths-ignore:
+      - '**/README.md'
+      
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+  PYENV_VERSION: 2.7.18
+
+jobs:
+  build-windows:
+    name: build-windows
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        arch:
+          - x86
+          - x64
+    env:
+      BUILD_ARCH: ${{ matrix.arch }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - name: Setup Python
+        uses: actions/setup-python@v2
+      - name: Build
+        run: tools\win-ci\build.ps1 $env:BUILD_ARCH
+
+  build-linux:
+    name: build-linux
+    runs-on: ubuntu-latest
+    env:
+      GH_OS_NAME: linux
+      BUILD_TARGET: linux
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - name: Build
+        run: |
+          tools/unix-ci/before-install.sh
+          tools/unix-ci/run-script.sh
+
+  build-android:
+    name: build-android
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        arch:
+          - armeabi-v7a
+          - arm64-v8a
+          - x86
+    env:
+      GH_OS_NAME: linux
+      BUILD_TARGET: android
+      BUILD_ARCH: ${{ matrix.arch }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'microsoft' # See 'Supported distributions' for available options
+          java-version: '11'
+      - name: Build
+        run: |
+          tools/unix-ci/before-install.sh
+          tools/unix-ci/run-script.sh
+
+  build-osx:
+    name: build-osx
+    runs-on: macos-latest
+    env:
+      GH_OS_NAME: osx
+      BUILD_TARGET: osx
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - name: Build
+        run: |
+          tools/unix-ci/before-install.sh
+          tools/unix-ci/run-script.sh
+ 
+  build-ios:
+    name: build-ios
+    runs-on: macos-latest
+    env:
+      GH_OS_NAME: osx
+      BUILD_TARGET: ios
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - name: Build
+        run: |
+          tools/unix-ci/before-install.sh
+          tools/unix-ci/run-script.sh

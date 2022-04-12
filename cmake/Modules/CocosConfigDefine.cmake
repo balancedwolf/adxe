@@ -12,6 +12,13 @@ endif()
  #LINUX      =   Linux
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(WINDOWS TRUE)
+    if(NOT ("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "Win32"))
+        set(WIN64 TRUE)
+        set(ARCH_ALIAS "x64")
+     else()
+        set(WIN32 TRUE)
+        set(ARCH_ALIAS "x86")
+     endif()
     set(PLATFORM_FOLDER win32)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Android")
     set(PLATFORM_FOLDER android)
@@ -57,35 +64,71 @@ define_property(TARGET
     FULL_DOCS "use to save depend libs of cocos2d lua project"
 ) 
 
-# check c++ standard
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD 11)
+# config c standard
+if (NOT WINDOWS)
+    if(NOT DEFINED C_STD)
+        set(C_STD 11)
+    endif()
+    message(STATUS "C_STD=${C_STD}")
+    set(CMAKE_C_STANDARD ${C_STD})
+    set(CMAKE_C_STANDARD_REQUIRED ON)
+endif()
+
+# config c++ standard
+if(NOT DEFINED CXX_STD)
+    set(CXX_STD 17)
+endif()
+message(STATUS "CXX_STD=${CXX_STD}")
+set(CMAKE_CXX_STANDARD ${CXX_STD})
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+if (MSVC)
+    add_compile_options(/GF)
+endif()
+
+set(CMAKE_DEBUG_POSTFIX "" CACHE STRING "Library postfix for debug builds. Normally left blank." FORCE)
+
+# set hash style to both for android old device compatible
+# see also: https://github.com/adxeproject/adxe/discussions/614
+if (ANDROID)
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--hash-style=both")
+endif()
+
 # check visual studio version
- if(WINDOWS)
+if(WINDOWS)
     # not support other compile tools except MSVC for now
     if(MSVC)
         # Visual Studio 2015, MSVC_VERSION 1900      (v140 toolset)
         # Visual Studio 2017, MSVC_VERSION 1910-1919 (v141 toolset)
         if(${MSVC_VERSION} EQUAL 1900 OR ${MSVC_VERSION} GREATER 1900)
-            message(STATUS "using Windows MSVC generate cocos2d-x project, MSVC_VERSION:${MSVC_VERSION}")
+            message(STATUS "using Windows MSVC generate adxe project, MSVC_VERSION:${MSVC_VERSION}")
         else()
-            message(FATAL_ERROR "using Windows MSVC generate cocos2d-x project, MSVC_VERSION:${MSVC_VERSION} lower than needed")
+            message(FATAL_ERROR "using Windows MSVC generate adxe project, MSVC_VERSION:${MSVC_VERSION} lower than needed")
         endif()
     else()
-        message(FATAL_ERROR "please using Windows MSVC compile cocos2d-x project, support other compile tools not yet")
+        message(FATAL_ERROR "please using Windows MSVC compile adxe project, support other compile tools not yet")
     endif()
 endif()
 
- # Set macro definitions for special platforms
- function(use_cocos2dx_compile_define target)
+# Set macro definitions for special platforms
+function(use_cocos2dx_compile_define target)
     target_compile_definitions(${target} PUBLIC $<$<CONFIG:Debug>:COCOS2D_DEBUG=1>)
+    
+    # !important adxe not use double precision
+    # target_compile_definitions(${target} PUBLIC CP_USE_CGTYPES=0)
+    # target_compile_definitions(${target} PUBLIC CP_USE_DOUBLES=0)
+    
     if(APPLE)
         target_compile_definitions(${target} PUBLIC __APPLE__)
         target_compile_definitions(${target} PUBLIC USE_FILE32API)
+        if(AX_USE_COMPAT_GL)
+            target_compile_definitions(${target} 
+                PUBLIC AX_USE_COMPAT_GL=1 
+                PUBLIC GL_SILENCE_DEPRECATION=1
+            )
+        endif()
+        
     elseif(LINUX)
         target_compile_definitions(${target} PUBLIC LINUX)
         target_compile_definitions(${target} PUBLIC _GNU_SOURCE)
@@ -93,6 +136,9 @@ endif()
         target_compile_definitions(${target} PUBLIC ANDROID)
         target_compile_definitions(${target} PUBLIC USE_FILE32API)
     elseif(WINDOWS)
+        if(AX_USE_COMPAT_GL)
+            target_compile_definitions(${target} PUBLIC AX_USE_COMPAT_GL=1)
+        endif()
         target_compile_definitions(${target} 
             PUBLIC WIN32
             PUBLIC _WIN32
@@ -101,15 +147,12 @@ endif()
             PUBLIC _UNICODE
             PUBLIC _CRT_SECURE_NO_WARNINGS
             PUBLIC _SCL_SECURE_NO_WARNINGS
+            # PUBLIC GLAD_GLAPI_EXPORT
         )
         if(BUILD_SHARED_LIBS)
             target_compile_definitions(${target} 
-                PUBLIC _USRDLL
-                PUBLIC _EXPORT_DLL_
-                PUBLIC _USEGUIDLL
-                PUBLIC _USREXDLL
-                PUBLIC _USRSTUDIODLL
-                PUBLIC _USE3DDLL
+                PRIVATE _USRDLL
+                PRIVATE _USEGUIDLL # ui
             )
         else()
             target_compile_definitions(${target} PUBLIC CC_STATIC)
@@ -117,11 +160,30 @@ endif()
     endif()
 endfunction()
 
- # Set compiler options
- function(use_cocos2dx_compile_options target)
+# Set compiler options
+function(use_cocos2dx_compile_options target)
     if(MSVC)
         target_compile_options(${target}
             PUBLIC /MP
         )
     endif()
- endfunction()
+endfunction()
+
+# softfp for android armv7a?
+# if(ANDROID)
+# 	if(${ANDROID_ABI} STREQUAL "armeabi-v7a")
+#         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfloat-abi=softfp")
+#         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfloat-abi=softfp")
+# 	endif()
+# endif()
+
+# Try enable asm & nasm compiler support
+set(can_use_assembler TRUE)
+enable_language(ASM)
+enable_language(ASM_NASM OPTIONAL)
+message(STATUS "The nasm compiler speed up libraries: jpeg(libjpeg-turbo)")
+
+if(NOT EXISTS "${CMAKE_ASM_NASM_COMPILER}")
+   set(CMAKE_ASM_NASM_COMPILER_LOADED FALSE CACHE BOOL "Does cmake asm nasm compiler loaded" FORCE)
+   message(WARNING "The nasm compiler doesn't present on your system PATH, please download from: https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/")
+endif()

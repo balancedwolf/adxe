@@ -20,3 +20,5 @@ if(BUILD_SHARED_LIBS)
 endif()
 
 target_include_directories(${target_name} PUBLIC "runtime/include")
+
+setup_cocos_extension_config(${target_name})

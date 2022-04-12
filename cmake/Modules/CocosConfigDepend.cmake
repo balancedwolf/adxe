@@ -2,11 +2,13 @@ macro(cocos2dx_depend)
     # confim the libs, prepare to link
     set(PLATFORM_SPECIFIC_LIBS)
 
+    message(STATUS "AX_USE_ALSOFT=${AX_USE_ALSOFT}")
+
     if(WINDOWS)
         list(APPEND PLATFORM_SPECIFIC_LIBS ws2_32 userenv psapi winmm Version Iphlpapi opengl32)
     elseif(LINUX)
         # need review those libs: X11 Xi Xrandr Xxf86vm Xinerama Xcursor rt m
-        list(APPEND PLATFORM_SPECIFIC_LIBS dl X11 Xi Xrandr Xxf86vm Xinerama Xcursor rt m)
+        list(APPEND PLATFORM_SPECIFIC_LIBS dl X11 Xi Xrandr Xxf86vm Xinerama Xcursor rt m bsd)
         # use older cmake style on below linux libs
         cocos_find_package(Fontconfig FONTCONFIG REQUIRED)	
         cocos_find_package(GTK3 GTK3 REQUIRED)
@@ -26,18 +28,24 @@ macro(cocos2dx_depend)
         include_directories(/System/Library/Frameworks)
         find_library(AUDIOTOOLBOX_LIBRARY AudioToolbox)
         find_library(FOUNDATION_LIBRARY Foundation)
-        find_library(OPENAL_LIBRARY OpenAL)
         find_library(QUARTZCORE_LIBRARY QuartzCore)
         find_library(GAMECONTROLLER_LIBRARY GameController)
         find_library(METAL_LIBRARY Metal)
         set(COCOS_APPLE_LIBS
-            ${OPENAL_LIBRARY}
             ${AUDIOTOOLBOX_LIBRARY}
             ${QUARTZCORE_LIBRARY}
             ${FOUNDATION_LIBRARY}
             ${GAMECONTROLLER_LIBRARY}
             ${METAL_LIBRARY}
             )
+
+        if(NOT AX_USE_ALSOFT)
+            find_library(OPENAL_LIBRARY OpenAL)
+            set(COCOS_APPLE_LIBS 
+            ${OPENAL_LIBRARY}
+            ${COCOS_APPLE_LIBS}
+            )
+        endif()
             
         if(MACOSX)
             list(APPEND PREBUILT_SPECIFIC_LIBS GLFW3)
@@ -48,6 +56,9 @@ macro(cocos2dx_depend)
             find_library(IOKIT_LIBRARY IOKit)
             find_library(APPKIT_LIBRARY AppKit)
             find_library(ICONV_LIBRARY iconv)
+            find_library(AUDIOUNIT_LIBRARY AudioUnit)
+            find_library(COREAUDIO_LIBRARY CoreAudio)
+            find_library(SYSTEMCONFIGURATION_LIBRARY SystemConfiguration)
             list(APPEND PLATFORM_SPECIFIC_LIBS
                  ${COCOA_LIBRARY}
                  ${OPENGL_LIBRARY}
@@ -56,6 +67,9 @@ macro(cocos2dx_depend)
                  ${COCOS_APPLE_LIBS}
                  ${APPKIT_LIBRARY}
                  ${ICONV_LIBRARY}
+                 ${AUDIOUNIT_LIBRARY}
+                 ${COREAUDIO_LIBRARY}
+                 ${SYSTEMCONFIGURATION_LIBRARY}
                  )
         elseif(IOS)
             # Locate system libraries on iOS
@@ -69,6 +83,8 @@ macro(cocos2dx_depend)
             find_library(CORE_GRAPHICS_LIBRARY CoreGraphics)
             find_library(AV_FOUNDATION_LIBRARY AVFoundation)
             find_library(WEBKIT_LIBRARY WebKit)
+            find_library(ZLIB z)
+            find_library(ICONVLIB iconv)
             list(APPEND PLATFORM_SPECIFIC_LIBS
                  ${UIKIT_LIBRARY}
                  ${OPENGLES_LIBRARY}
@@ -81,8 +97,8 @@ macro(cocos2dx_depend)
                  ${AV_FOUNDATION_LIBRARY}
                  ${WEBKIT_LIBRARY}
                  ${COCOS_APPLE_LIBS}
-                 "/usr/lib/libz.dylib"
-                 "/usr/lib/libiconv.dylib"
+                 ${ZLIB}
+                 ${ICONVLIB}
                  )
         endif()
     endif()

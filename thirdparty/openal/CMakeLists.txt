@@ -1215,6 +1215,11 @@ else()
     set(LIBNAME "OpenAL32")
 endif()
 
+if(XBOX)
+        set(EXTRA_LIBS winmm OLE32 Shell32 user32 ${EXTRA_LIBS})
+endif()
+
+
 # Needed for openal.pc.in
 set(prefix ${CMAKE_INSTALL_PREFIX})
 set(exec_prefix "\${prefix}")

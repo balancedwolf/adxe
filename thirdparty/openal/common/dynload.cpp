@@ -12,7 +12,11 @@
 void *LoadLib(const char *name)
 {
     std::wstring wname{utf8_to_wstr(name)};
+#if WINAPI_FAMILY != WINAPI_FAMILY_DESKTOP_APP
+    return LoadPackagedLibrary(wname.c_str(), 0);
+#else
     return LoadLibraryW(wname.c_str());
+#endif
 }
 void CloseLib(void *handle)
 { FreeLibrary(static_cast<HMODULE>(handle)); }

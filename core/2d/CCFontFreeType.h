@@ -32,11 +32,16 @@
 
 #include "2d/CCFont.h"
 
+#define generic GenericFromFreeTypeLibrary
+#define internal InternalFromFreeTypeLibrary
 #include "ft2build.h"
-#include <string>
-
 #include FT_FREETYPE_H
 #include FT_STROKER_H
+#undef generic
+#undef internal
+
+#include <string>
+
 
 NS_CC_BEGIN
 

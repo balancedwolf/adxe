@@ -284,6 +284,7 @@ void LoadConfigFromFile(std::istream &f)
 void ReadALConfig()
 {
     WCHAR buffer[MAX_PATH];
+#if WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP
     if(SHGetSpecialFolderPathW(nullptr, buffer, CSIDL_APPDATA, FALSE) != FALSE)
     {
         std::string filepath{wstr_to_utf8(buffer)};
@@ -294,6 +295,7 @@ void ReadALConfig()
         if(f.is_open())
             LoadConfigFromFile(f);
     }
+#endif
 
     std::string ppath{GetProcBinary().path};
     if(!ppath.empty())

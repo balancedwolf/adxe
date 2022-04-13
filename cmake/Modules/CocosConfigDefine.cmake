@@ -10,7 +10,7 @@ endif()
  #IOS    =  iOS
  #MACOSX    =  MacOS X
  #LINUX      =   Linux
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR ${CMAKE_SYSTEM_NAME} MATCHES "WINDOWS")
     set(WINDOWS TRUE)
     if(NOT ("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "Win32"))
         set(WIN64 TRUE)
@@ -38,6 +38,7 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "iOS")
     set(IOS TRUE)
     set(PLATFORM_FOLDER ios)
 else()
+    message(FATAL_ERROR ${CMAKE_SYSTEM_NAME})
     message(FATAL_ERROR "Unsupported platform, CMake will exit")
     return()
 endif()

@@ -45,7 +45,7 @@ namespace al {
 
 al::optional<std::string> getenv(const char *envname)
 {
-    const char *str{std::getenv(envname)};
+    const char *str{::getenv(envname)};
     if(str && str[0] != '\0')
         return al::make_optional<std::string>(str);
     return al::nullopt;

@@ -94,8 +94,13 @@ bool filebuf::open(const wchar_t *filename, std::ios_base::openmode mode)
 {
     if((mode&std::ios_base::out) || !(mode&std::ios_base::in))
         return false;
+#if WINAPI_FAMILY != WINAPI_FAMILY_DESKTOP_APP
+    HANDLE f{CreateFile2(filename, GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING,
+        nullptr)};
+#else
     HANDLE f{CreateFileW(filename, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
         FILE_ATTRIBUTE_NORMAL, nullptr)};
+#endif
     if(f == INVALID_HANDLE_VALUE) return false;
 
     if(mFile != INVALID_HANDLE_VALUE)

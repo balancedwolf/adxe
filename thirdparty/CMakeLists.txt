@@ -1,4 +1,3 @@
-
 project(thirdparty)
 
 if (NOT DEFINED AX_USE_ALSOFT)
@@ -80,10 +79,17 @@ target_link_libraries(thirdparty fmt-header-only)
 
 # bellow are non header only libs
 if(MACOSX OR ANDROID OR WINDOWS)
+if(WINRT)
+    add_subdirectory(win10-specific/zlib)
+    target_link_libraries(thirdparty 
+        dep_zlib
+    )
+else()
     add_subdirectory(zlib)
     target_link_libraries(thirdparty 
         dep_zlib
     )
+endif()
 endif()
 
 if(AX_WITH_BOX2D)
@@ -254,6 +260,12 @@ if(AX_WITH_ALSOFT)
     if(ANDROID)
         set(ANDROID_SHARED_LOADS "${ANDROID_SHARED_LOADS}System.loadLibrary(\"openal\");" CACHE INTERNAL "Android Shared Loads" )
     endif()
+
+    if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
+        target_include_directories(OpenAL PUBLIC ${Console_SdkIncludeRoot} PUBLIC ${Console_ExtIncPath})
+        target_link_directories(OpenAL PUBLIC ${Console_SdkLibPath} PUBLIC ${Console_ExtLibPath})
+    endif()
+
 endif()
 
 # The ogg decoder
@@ -267,18 +279,30 @@ if(WINDOWS OR LINUX)
     configure_target_outdir(glad)
 endif()
 
+if(WINRT)
+    add_subdirectory(win10-specific/angle)
+    add_subdirectory(win10-specific/icon)
+    target_link_libraries(thirdparty 
+        ext_EGL
+        ext_GLESV2
+    )
+endif()
+
+
 if(WINDOWS OR MACOSX OR LINUX)
-    set(GLFW_BUILD_DOCS OFF CACHE BOOL "Build the GLFW documentation" FORCE)
-    set(GLFW_INSTALL OFF CACHE BOOL "Build the GLFW documentation" FORCE)
-    add_subdirectory(glfw)
-    configure_target_outdir(glfw)
-    set_target_properties(glfw PROPERTIES
-                      OUTPUT_NAME glfw)
-    target_link_libraries(thirdparty glfw)
-    if(NOT WINDOWS)
-        target_link_libraries(thirdparty pthread)
+    if(NOT  WINRT)
+        set(GLFW_BUILD_DOCS OFF CACHE BOOL "Build the GLFW documentation" FORCE)
+        set(GLFW_INSTALL OFF CACHE BOOL "Build the GLFW documentation" FORCE)
+        add_subdirectory(glfw)
+        configure_target_outdir(glfw)
+        set_target_properties(glfw PROPERTIES
+                          OUTPUT_NAME glfw)
+        target_link_libraries(thirdparty glfw)
+        if(NOT WINDOWS)
+            target_link_libraries(thirdparty pthread)
+        endif()
+        target_include_directories(thirdparty PUBLIC "glfw/include/GLFW")
     endif()
-    target_include_directories(thirdparty PUBLIC "glfw/include/GLFW")
 endif()
 
 if(NOT LINUX)
@@ -358,3 +382,10 @@ if (ANDROID)
         configure_file(${ANDROID_SHARED_LOAD_FILE_PATH} ${target_folder}/${package_path}/${ANDROID_SHARED_LOAD_FILE_NAME} @ONLY)
     endfunction()
 endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
+    target_compile_definitions(ogg PUBLIC -D_CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions(unzip PUBLIC -D_CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions(png PUBLIC -D_CRT_SECURE_NO_WARNINGS)
+endif()
+

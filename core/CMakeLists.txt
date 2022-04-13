@@ -40,6 +40,10 @@ if (NOT DEFINED AX_USE_COMPAT_GL)
     set(AX_USE_COMPAT_GL FALSE CACHE INTERNAL "Enabling AX_USE_COMPAT_GL" )
 endif()
 
+if(WINRT)
+    set(AX_USE_COMPAT_GL TRUE CACHE INTERNAL "Enabling AX_USE_COMPAT_GL" )
+endif()
+
 if (NOT DEFINED AX_ENABLE_MSEDGE_WEBVIEW2)
     set(AX_ENABLE_MSEDGE_WEBVIEW2 TRUE CACHE INTERNAL "Enabling windows webview2" )
 endif()
@@ -203,3 +207,11 @@ endif()
 #    # TODO: Only turn this off if ${CMAKE_XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET} < 11.0
 #    target_compile_options(${ADXE_CORE_LIB} PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-fno-aligned-allocation>)
 #endif()
+
+
+
+if(WINRT)
+    #set(REFERENCES_DIR "$ENV{ProgramFiles\(x86\)}/Microsoft Visual Studio/2019/Professional/VC/Tools/MSVC/14.29.30133/lib/x86/store/references")
+    #target_compile_options(${ADXE_CORE_LIB} PRIVATE /AI"${WindowsSdkDir}/UnionMetadata/10.0.22000.0" /AI"${REFERENCES_DIR}")
+    target_compile_options(${ADXE_CORE_LIB} PUBLIC -ZW) # -D becomes "", then ignored
+endif()

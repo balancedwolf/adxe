@@ -39,4 +39,6 @@ THE SOFTWARE.
 #    include "platform/win32/CCPlatformDefine-win32.h"
 #elif CC_TARGET_PLATFORM == CC_PLATFORM_LINUX
 #    include "platform/linux/CCPlatformDefine-linux.h"
+#elif CC_TARGET_PLATFORM == CC_PLATFORM_WINRT
+#    include "platform/winrt/CCPlatformDefine-winrt.h"
 #endif

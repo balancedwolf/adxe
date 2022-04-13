@@ -218,6 +218,14 @@ THE SOFTWARE.
 #    include "platform/linux/CCStdC-linux.h"
 #endif  // CC_TARGET_PLATFORM == CC_PLATFORM_LINUX
 
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
+#    include "platform/winrt/CCApplication.h"
+#    include "platform/winrt/CCGLViewImpl-winrt.h"
+#    include "platform/winrt/CCGL.h"
+#    include "platform/winrt/CCStdC.h"
+#endif
+
+
 // script_support
 #include "base/CCScriptSupport.h"
 

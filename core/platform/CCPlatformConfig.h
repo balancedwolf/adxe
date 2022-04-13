@@ -53,7 +53,7 @@ THE SOFTWARE.
 // #define CC_PLATFORM_EMSCRIPTEN        10
 // #define CC_PLATFORM_TIZEN             11
 // #define CC_PLATFORM_QT5               12
-// #define CC_PLATFORM_WINRT             13
+#define CC_PLATFORM_WINRT             13
 
 // Determine target platform by compile environment macro.
 #define CC_TARGET_PLATFORM CC_PLATFORM_UNKNOWN
@@ -88,6 +88,17 @@ THE SOFTWARE.
 #    undef CC_TARGET_PLATFORM
 #    define CC_TARGET_PLATFORM CC_PLATFORM_LINUX
 #endif
+
+#if defined(_MSC_VER)
+    #include <winapifamily.h>
+    #if !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+     #if WINAPI_FAMILY != WINAPI_FAMILY_GAMES
+        #undef CC_TARGET_PLATFORM
+        #define CC_TARGET_PLATFORM CC_PLATFORM_WINRT
+    #endif
+    #endif
+#endif
+
 
 //////////////////////////////////////////////////////////////////////////
 // post configure

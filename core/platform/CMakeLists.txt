@@ -32,6 +32,46 @@ if(ANDROID)
         platform/android/CCEnhanceAPI-android.cpp
     )
 elseif(WINDOWS)
+if(WINRT)
+set(COCOS_PLATFORM_SPECIFIC_HEADER
+        platform/winrt/CCApplication.h
+        platform/winrt/CCFileUtilsWinRT.h
+        platform/winrt/CCFreeTypeFont.h
+        platform/winrt/CCGL.h
+        platform/winrt/CCGLViewImpl-winrt.h
+        platform/winrt/CCPlatformDefine-winrt.h
+        platform/winrt/CCPrecompiledShaders.h
+        platform/winrt/CCPThreadWinRT.h
+        platform/winrt/CCStdC.h
+        platform/winrt/CCWinRTUtils.h
+        platform/winrt/InputEvent.h
+        platform/winrt/InputEventTypes.h
+        platform/winrt/Keyboard-winrt.h
+        platform/winrt/sha1.h
+        platform/winrt/inet_pton_winrt.h
+        platform/winrt/inet_ntop_winrt.h
+        platform/winrt/WICImageLoader-winrt.h
+        )
+
+    set(COCOS_PLATFORM_SPECIFIC_SRC
+        platform/winrt/CCApplication.cpp
+        platform/winrt/CCCommon.cpp
+        platform/winrt/CCDevice.cpp
+        platform/winrt/CCFileUtilsWinRT.cpp
+        platform/winrt/CCFreeTypeFont.cpp
+        platform/winrt/CCGLViewImpl-winrt.cpp
+        platform/winrt/CCPrecompiledShaders.cpp
+        platform/winrt/CCPThreadWinRT.cpp
+        platform/winrt/CCStdC.cpp
+        platform/winrt/CCWinRTUtils.cpp
+        platform/winrt/InputEvent.cpp
+        platform/winrt/Keyboard-winrt.cpp
+        platform/winrt/sha1.cpp
+        platform/winrt/WICImageLoader-winrt.cpp
+        )
+
+else()
+
     set(COCOS_PLATFORM_SPECIFIC_HEADER
         platform/win32/compat/stdint.h
         platform/win32/CCApplication-win32.h
@@ -51,7 +91,7 @@ elseif(WINDOWS)
         platform/win32/inet_pton_mingw.cpp
         platform/desktop/CCGLViewImpl-desktop.cpp
         )
-
+endif()
 elseif(APPLE)
     set(COCOS_PLATFORM_SPECIFIC_HEADER
         platform/apple/CCFileUtils-apple.h

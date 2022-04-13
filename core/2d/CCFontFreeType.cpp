@@ -27,13 +27,17 @@ THE SOFTWARE.
 
 #include "2d/CCFontFreeType.h"
 
+#define generic GenericFromFreeTypeLibrary
+#define internal InternalFromFreeTypeLibrary
 #include "freetype/ftfntfmt.h"
-
 #include FT_BBOX_H
+#include "freetype/internal/tttypes.h"
+#undef generic
+#undef internal
+
 #include "2d/CCFontAtlas.h"
 #include "base/CCDirector.h"
 #include "base/ccUTF8.h"
-#include "freetype/internal/tttypes.h"
 #include "platform/CCFileUtils.h"
 #include "platform/CCFileStream.h"
 

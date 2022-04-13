@@ -166,6 +166,7 @@ LogLevel gLogLevel{LogLevel::Error};
 #if defined(_WIN32) && !defined(AL_LIBTYPE_STATIC)
 BOOL APIENTRY DllMain(HINSTANCE module, DWORD reason, LPVOID /*reserved*/)
 {
+#if WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP
     switch(reason)
     {
     case DLL_PROCESS_ATTACH:
@@ -174,6 +175,7 @@ BOOL APIENTRY DllMain(HINSTANCE module, DWORD reason, LPVOID /*reserved*/)
             reinterpret_cast<WCHAR*>(module), &module);
         break;
     }
+#endif
     return TRUE;
 }
 #endif

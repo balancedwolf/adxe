@@ -22,6 +22,8 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     set(GLFW_STANDALONE TRUE)
 endif()
 
+option(XBOX "Build for Xbox" OFF)
+
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 option(GLFW_BUILD_EXAMPLES "Build the GLFW example programs" ${GLFW_STANDALONE})
 option(GLFW_BUILD_TESTS "Build the GLFW test programs" ${GLFW_STANDALONE})
@@ -61,7 +63,11 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH "${GLFW_SOURCE_DIR}/CMake/modules")
 
-find_package(Threads REQUIRED)
+if(XBOX)
+    #find_package(pthread REQUIRED)
+else()
+    find_package(Threads REQUIRED)
+endif()
 
 if (GLFW_BUILD_DOCS)
     set(DOXYGEN_SKIP_DOT TRUE)

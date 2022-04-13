@@ -22,6 +22,9 @@ else()
   set(AX_ENABLE_EXT_IMGUI OFF)
 endif()
 
+option(AX_ENABLE_EXT_CREATORREADER "Build extension creator reader" ON)
+
+
 if(BUILD_SHARED_LIBS)
   cmake_policy(SET CMP0079 NEW)
 endif()
@@ -119,6 +122,10 @@ endif()
 
 if(AX_ENABLE_EXT_LUA)
   add_subdirectory(scripting/lua-bindings)
+endif()
+
+if(AX_ENABLE_EXT_CREATORREADER)
+  add_subdirectory(creator_reader)
 endif()
 
 

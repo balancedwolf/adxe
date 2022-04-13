@@ -29,7 +29,7 @@
 #include <map>
 #include <memory>
 
-#include "Lua.hpp"
+#include "sol.hpp"
 #include "LuaState.hpp"
 #include "LuaType.hpp"
 

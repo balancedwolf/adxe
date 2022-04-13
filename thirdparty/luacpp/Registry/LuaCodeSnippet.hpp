@@ -27,7 +27,7 @@
 #include <string>
 #include <vector>
 
-#include "Lua.hpp"
+#include "sol.hpp"
 #include "../Engine/LuaState.hpp"
 
 extern "C" {

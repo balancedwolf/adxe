@@ -28,7 +28,7 @@
 
 #include <ostream>
 
-#include "Lua.hpp"
+#include "sol.hpp"
 
 namespace LuaCpp {
 	/**

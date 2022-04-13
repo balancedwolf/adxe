@@ -26,7 +26,7 @@
 #ifndef LUACPP_LUATNUMBER_HPP
 #define LUACPP_LUATNUMBER_HPP
 
-#include "Lua.hpp"
+#include "sol.hpp"
 #include "LuaState.hpp"
 #include "LuaType.hpp"
 

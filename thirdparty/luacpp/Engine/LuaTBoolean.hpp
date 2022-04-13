@@ -26,7 +26,7 @@
 #ifndef LUACPP_LUATBOOLEAN_HPP
 #define LUACPP_LUATBOOLEAN_HPP
 
-#include "Lua.hpp"
+#include "sol.hpp"
 #include "LuaState.hpp"
 #include "LuaType.hpp"
 

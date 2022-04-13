@@ -28,7 +28,7 @@
 
 #include <memory>
 
-#include "Lua.hpp"
+#include "sol.hpp"
 #include "Engine/LuaState.hpp"
 #include "Engine/LuaTUserData.hpp"
 

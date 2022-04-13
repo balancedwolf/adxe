@@ -28,7 +28,7 @@
 #include <string>
 #include <map>
 
-#include "Lua.hpp"
+#include "sol.hpp"
 #include "LuaCFunction.hpp"
 #include "../Engine/LuaState.hpp"
 

@@ -27,7 +27,7 @@
 
 #include <string>
 
-#include "Lua.hpp"
+#include "sol.hpp"
 
 namespace LuaCpp {
 	namespace Registry {

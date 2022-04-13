@@ -1608,6 +1608,9 @@ public:
      */
     Vec2 convertTouchToNodeSpaceAR(Touch* touch) const;
 
+    /// Convert cocos2d coordinates to UI windows coordinate.
+    Vec2 convertToWindowSpace(const Vec2& nodePoint) const;
+
     /**
      *  Sets an additional transform matrix to the node.
      *
@@ -1839,9 +1842,6 @@ protected:
 
     /// Removes a child, call child->onExit(), do cleanup, remove it from children array.
     void detachChild(Node* child, ssize_t index, bool cleanup);
-
-    /// Convert cocos2d coordinates to UI windows coordinate.
-    Vec2 convertToWindowSpace(const Vec2& nodePoint) const;
 
     Mat4 transform(const Mat4& parentTransform);
     uint32_t processParentFlags(const Mat4& parentTransform, uint32_t parentFlags);

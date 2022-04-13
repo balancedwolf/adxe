@@ -870,6 +870,12 @@ public:
      */
     virtual std::unique_ptr<FileStream> openFileStream(std::string_view filePath, FileStream::Mode mode);
 
+    /**
+     * Returns the fullpath for a given dirname.
+     * @since 3.17.1
+     */
+    virtual std::string fullPathForDirectory(std::string_view dirname) const;
+
 protected:
     /**
      *  The default constructor.
@@ -916,12 +922,6 @@ protected:
      */
     virtual std::string getFullPathForFilenameWithinDirectory(std::string_view directory,
                                                               std::string_view filename) const;
-
-    /**
-     * Returns the fullpath for a given dirname.
-     * @since 3.17.1
-     */
-    virtual std::string fullPathForDirectory(std::string_view dirname) const;
 
     /**
      * mutex used to protect fields.

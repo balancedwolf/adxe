@@ -22,7 +22,7 @@ else()
   set(AX_ENABLE_EXT_IMGUI OFF)
 endif()
 
-option(AX_ENABLE_EXT_CREATORREADER "Build extension creator reader" ON)
+option(AX_ENABLE_EXT_CREATORREADER "Build extension creator reader" OFF)
 
 
 if(BUILD_SHARED_LIBS)
@@ -127,6 +127,5 @@ endif()
 if(AX_ENABLE_EXT_CREATORREADER)
   add_subdirectory(creator_reader)
 endif()
-
 
 message(STATUS "CC_EXTENSION_LIBS:${CC_EXTENSION_LIBS}")

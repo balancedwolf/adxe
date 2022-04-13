@@ -23,6 +23,8 @@
  ****************************************************************************/
 
 #include "CreatorReader.h"
+#include "DragonBones/animation/Animation.h"
+#include "DragonBones/CCArmatureDisplay.h"
 #include "animation/AnimationClip.h"
 #include "animation/AnimateClip.h"
 #include "ui/RichtextStringVisitor.h"
@@ -1404,7 +1406,7 @@ dragonBones::CCArmatureDisplay* CreatorReader::createArmatureDisplay(const buffe
     
     if (boneDataPath && atlasDataPath)
     {
-        auto factory = dragonBones::CCFactory::getInstance();
+        auto factory = dragonBones::CCFactory::getFactory();
         const auto& boneDataName = dragonBonesBuffer->boneDataName();
         
         // DragonBones can not reload Bone data in debug mode, may cause asset crash.
@@ -1433,7 +1435,7 @@ void CreatorReader::parseArmatureDisplay(dragonBones::CCArmatureDisplay* armatur
     const auto& animationName = dragonBonesBuffer->animation();
     if (animationName)
     {
-        armatureDisplay->getAnimation().play(animationName->str());
+        armatureDisplay->getAnimation()->play(animationName->str());
     }
 }
 

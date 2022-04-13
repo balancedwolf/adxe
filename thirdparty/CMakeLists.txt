@@ -30,6 +30,7 @@ option(AX_WITH_CARES "Build with internal c-ares support" OFF)
 option(AX_WITH_LLHTTP "Build with lhttp support" ON)
 option(AX_WITH_YAML_CPP "Build with yaml-cpp support" OFF)
 option(AX_WITH_KCP "Build with internal kcp support" OFF)
+option(AX_WITH_LUACPP "Build with luacpp support" ON)
 
 # by default, enable ios,macOS openal-soft framework for legal license LGPL-2.1
 option(ALSOFT_OSX_FRAMEWORK "" ON)
@@ -221,10 +222,17 @@ if(AX_ENABLE_EXT_LUA)
     add_subdirectory(lua/${AX_LUA_ENGINE})
     add_subdirectory(lua/tolua)
     add_subdirectory(lua/lua-cjson)
+    
+    if(AX_WITH_LUACPP)
+        add_subdirectory(luacpp)
+    endif()
+
     set_property(TARGET thirdparty APPEND PROPERTY 
         CC_LUA_DEPEND ${AX_LUA_ENGINE} tolua lua-cjson
     )
-endif()
+    
+
+endif(AX_ENABLE_EXT_LUA)
 
 if(NOT LINUX)
     if(AX_WITH_CURL)
@@ -260,12 +268,6 @@ if(AX_WITH_ALSOFT)
     if(ANDROID)
         set(ANDROID_SHARED_LOADS "${ANDROID_SHARED_LOADS}System.loadLibrary(\"openal\");" CACHE INTERNAL "Android Shared Loads" )
     endif()
-
-    if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
-        target_include_directories(OpenAL PUBLIC ${Console_SdkIncludeRoot} PUBLIC ${Console_ExtIncPath})
-        target_link_directories(OpenAL PUBLIC ${Console_SdkLibPath} PUBLIC ${Console_ExtLibPath})
-    endif()
-
 endif()
 
 # The ogg decoder

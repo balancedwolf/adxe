@@ -226,7 +226,6 @@ public:
     bool initWithXML(std::string_view tmxString, std::string_view resourcePath);
 
 protected:
-	FastTMXLayer* parseLayer(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo, TMXTilesetInfo* tilesetInfo);
 	FastTMXLayer* parseLayer(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo, std::vector<TMXTilesetInfo*> tilesetInfos);
     TMXTilesetInfo* tilesetForLayer(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);
 	TMXLayerInfo* cloneLayer(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);

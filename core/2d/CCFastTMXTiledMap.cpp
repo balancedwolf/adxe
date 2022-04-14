@@ -94,20 +94,6 @@ FastTMXTiledMap::FastTMXTiledMap() : _mapSize(Vec2::ZERO), _tileSize(Vec2::ZERO)
 FastTMXTiledMap::~FastTMXTiledMap() {}
 
 // private
-FastTMXLayer* FastTMXTiledMap::parseLayer(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo, TMXTilesetInfo* tileset)
-{
-	if (tileset == nullptr)
-		return nullptr;
-	
-	FastTMXLayer* layer = FastTMXLayer::create(tileset, layerInfo, mapInfo);
-	
-	// tell the layerinfo to release the ownership of the tiles map.
-	layerInfo->_ownTiles = false;
-	layer->setupTiles();
-	
-	return layer;
-}
-
 FastTMXLayer* FastTMXTiledMap::parseLayer(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo, std::vector<TMXTilesetInfo*> tilesets)
 {
 	if (tilesets.size() == 0)

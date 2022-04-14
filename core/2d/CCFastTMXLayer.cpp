@@ -57,19 +57,6 @@ const int FastTMXLayer::FAST_TMX_ORIENTATION_ORTHO = 0;
 const int FastTMXLayer::FAST_TMX_ORIENTATION_HEX   = 1;
 const int FastTMXLayer::FAST_TMX_ORIENTATION_ISO   = 2;
 
-// FastTMXLayer - init & alloc & dealloc
-FastTMXLayer* FastTMXLayer::create(TMXTilesetInfo* tilesetInfo, TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo)
-{
-	FastTMXLayer* ret = new FastTMXLayer();
-	if (ret->initWithTilesetInfo(tilesetInfo, layerInfo, mapInfo))
-	{
-		ret->autorelease();
-		return ret;
-	}
-	CC_SAFE_DELETE(ret);
-	return nullptr;
-}
-
 FastTMXLayer* FastTMXLayer::create(std::vector<TMXTilesetInfo*> tilesetInfos, TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo)
 {
 	FastTMXLayer* ret = new FastTMXLayer();
@@ -137,49 +124,6 @@ bool FastTMXLayer::initWithTilesetInfos(std::vector<TMXTilesetInfo*> tilesetInfo
 	return true;
 }
 
-bool FastTMXLayer::initWithTilesetInfo(TMXTilesetInfo* tilesetInfo, TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo)
-{
-	
-	if (tilesetInfo)
-	{
-		_texture = _director->getTextureCache()->addImage(tilesetInfo->_sourceImage);
-		_texture->retain();
-	}
-	
-	// layerInfo
-	_layerName  = layerInfo->_name;
-	_layerSize  = layerInfo->_layerSize;
-	_tiles      = layerInfo->_tiles;
-	_quadsDirty = true;
-	setOpacity(layerInfo->_opacity);
-	setProperties(layerInfo->getProperties());
-	
-	// tilesetInfo
-	_tileSet = tilesetInfo;
-	CC_SAFE_RETAIN(_tileSet);
-	
-	// mapInfo
-	_mapTileSize      = mapInfo->getTileSize();
-	_mapSize 		  = mapInfo->getMapSize();
-	_layerOrientation = mapInfo->getOrientation();
-	_staggerAxis      = mapInfo->getStaggerAxis();
-	_staggerIndex     = mapInfo->getStaggerIndex();
-	
-	// offset (after layer orientation is set);
-	Vec2 offset = this->calculateLayerOffset(layerInfo->_offset);
-	this->setPosition(CC_POINT_PIXELS_TO_POINTS(offset));
-	
-	this->setContentSize(
-						 CC_SIZE_PIXELS_TO_POINTS(Vec2(_layerSize.width * _mapTileSize.width, _layerSize.height * _mapTileSize.height)));
-	
-	this->tileToNodeTransform();
-	
-	_useAutomaticVertexZ = false;
-	_vertexZvalue        = 0;
-	
-	return true;
-}
-
 FastTMXLayer::FastTMXLayer() {}
 
 FastTMXLayer::~FastTMXLayer()
@@ -187,9 +131,11 @@ FastTMXLayer::~FastTMXLayer()
 	for (auto tileSet : _tileSets) {
 		CC_SAFE_RELEASE(tileSet);
 	}
+	
+	for (auto texture : _textures) {
+		CC_SAFE_RELEASE(texture);
+	}
 
-	CC_SAFE_RELEASE(_tileSet);
-	CC_SAFE_RELEASE(_texture);
 	CC_SAFE_RELEASE(_vertexBuffer);
 	CC_SAFE_RELEASE(_indexBuffer);
 	
@@ -197,6 +143,11 @@ FastTMXLayer::~FastTMXLayer()
 	{
 		CC_SAFE_RELEASE(e.second->getPipelineDescriptor().programState);
 		delete e.second;
+	}
+	
+	if(_tileAnimManager != nullptr){
+		delete _tileAnimManager;
+		_tileAnimManager = nullptr;
 	}
 }
 
@@ -411,59 +362,69 @@ void FastTMXLayer::setupTiles()
 	
 	return;
 	
-	if (!_tileSet->_animationInfo.empty())
-	{
-		/// FastTMXLayer: anim support
-		for (int y = 0; y < _layerSize.height; y++)
+	bool hasAtLeastAnimations = false;
+	
+	for(auto tileset : _tileSets){
+		
+		if (!tileset->_animationInfo.empty())
 		{
-			for (int x = 0; x < _layerSize.width; x++)
+			/// FastTMXLayer: anim support
+			for (int y = 0; y < _layerSize.height; y++)
 			{
-				int newX = x;
-				// fix correct render ordering in Hexagonal maps when stagger axis == x
-				if (_staggerAxis == TMXStaggerAxis_X && _layerOrientation == TMXOrientationHex)
+				for (int x = 0; x < _layerSize.width; x++)
 				{
-					if (_staggerIndex == TMXStaggerIndex_Odd)
+					int newX = x;
+					// fix correct render ordering in Hexagonal maps when stagger axis == x
+					if (_staggerAxis == TMXStaggerAxis_X && _layerOrientation == TMXOrientationHex)
 					{
-						if (x >= _layerSize.width / 2)
-							newX = (x - std::ceil(_layerSize.width / 2)) * 2 + 1;
+						if (_staggerIndex == TMXStaggerIndex_Odd)
+						{
+							if (x >= _layerSize.width / 2)
+								newX = (x - std::ceil(_layerSize.width / 2)) * 2 + 1;
+							else
+								newX = x * 2;
+						}
 						else
-							newX = x * 2;
+						{
+							// TMXStaggerIndex_Even
+							if (x >= static_cast<int>(_layerSize.width / 2))
+								newX = (x - static_cast<int>(_layerSize.width / 2)) * 2;
+							else
+								newX = x * 2 + 1;
+						}
 					}
-					else
+					
+					int pos = static_cast<int>(newX + _layerSize.width * y);
+					int gid = _tiles[pos];
+					
+					// gid are stored in little endian.
+					// if host is big endian, then swap
+					// if( o == CFByteOrderBigEndian )
+					//    gid = CFSwapInt32( gid );
+					/* We support little endian.*/
+					
+					// FIXME:: gid == 0 --> empty tile
+					if (gid != 0)
 					{
-						// TMXStaggerIndex_Even
-						if (x >= static_cast<int>(_layerSize.width / 2))
-							newX = (x - static_cast<int>(_layerSize.width / 2)) * 2;
-						else
-							newX = x * 2 + 1;
-					}
-				}
-				
-				int pos = static_cast<int>(newX + _layerSize.width * y);
-				int gid = _tiles[pos];
-				
-				// gid are stored in little endian.
-				// if host is big endian, then swap
-				// if( o == CFByteOrderBigEndian )
-				//    gid = CFSwapInt32( gid );
-				/* We support little endian.*/
-				
-				// FIXME:: gid == 0 --> empty tile
-				if (gid != 0)
-				{
-					if (_tileSet->_animationInfo.find(gid) != _tileSet->_animationInfo.end())
-					{
-						_animTileCoord[gid].push_back(Vec2(newX, y));
+						if (tileset->_animationInfo.find(gid) != tileset->_animationInfo.end())
+						{
+							_animTileCoord[tileset][gid].push_back(Vec2(newX, y));
+						}
 					}
 				}
 			}
-		}
-		
-		if (hasTileAnimation())
-		{
-			_tileAnimManager = new TMXTileAnimManager(this);
+			
+			if (hasTileAnimation(tileset))
+			{
+				hasAtLeastAnimations = true;
+			}
 		}
 	}
+	
+	if(hasAtLeastAnimations){
+		_tileAnimManager = new TMXTileAnimManager(this);
+	}
+	
 }
 
 Mat4 FastTMXLayer::tileToNodeTransform()
@@ -626,18 +587,7 @@ void FastTMXLayer::updateTotalQuads()
 				if (tileGID == 0)
 					continue;
 				
-				
-				int textureIndex = _tileSets.size() - 1;
-				
-				for (std::vector<TMXTilesetInfo*>::reverse_iterator i = _tileSets.rbegin();
-					 i != _tileSets.rend(); ++i ) {
-					if (tileGID >= (*i)->_firstGid) {
-						break;
-					}
-					
-					textureIndex--;
-
-				}
+				int textureIndex = getTextureIndexFromGid(tileGID);
 				
 				auto color = Color4B::WHITE;
 				color.a    = getDisplayedOpacity();
@@ -795,10 +745,12 @@ Sprite* FastTMXLayer::getTileAt(const Vec2& tileCoordinate)
 		}
 		else
 		{
+			int textureIndex = getTextureIndexFromGid(gid);
+
 			// tile not created yet. create it
-			Rect rect = _tileSet->getRectForGID(gid);
+			Rect rect = _tileSets[textureIndex]->getRectForGID(gid);
 			rect      = CC_RECT_PIXELS_TO_POINTS(rect);
-			tile      = Sprite::createWithTexture(_texture, rect);
+			tile      = Sprite::createWithTexture(_textures[textureIndex], rect);
 			
 			Vec2 p = this->getPositionAt(tileCoordinate);
 			tile->setAnchorPoint(Vec2::ZERO);
@@ -988,7 +940,7 @@ void FastTMXLayer::setTileGID(int gid, const Vec2& tileCoordinate, TMXTileFlags 
 			 tileCoordinate.y >= 0,
 			 "TMXLayer: invalid position");
 	CCASSERT(_tiles.size() > 0, "TMXLayer: the tiles map has been released");
-	CCASSERT(gid == 0 || gid >= _tileSet->_firstGid, "TMXLayer: invalid gid");
+	CCASSERT(gid == 0, "TMXLayer: invalid gid");
 	
 	TMXTileFlags currentFlags;
 	int currentGID = getTileGIDAt(tileCoordinate, &currentFlags);
@@ -1016,8 +968,10 @@ void FastTMXLayer::setTileGID(int gid, const Vec2& tileCoordinate, TMXTileFlags 
 		auto it = _spriteContainer.find(z);
 		if (it != _spriteContainer.end())
 		{
+			int textureIndex = getTextureIndexFromGid(gid);
+
 			Sprite* sprite = it->second.first;
-			Rect rect      = _tileSet->getRectForGID(gid);
+			Rect rect      = _tileSets[textureIndex]->getRectForGID(gid);
 			rect           = CC_RECT_PIXELS_TO_POINTS(rect);
 			
 			sprite->setTextureRect(rect, false, rect.size);
@@ -1102,12 +1056,20 @@ std::string FastTMXLayer::getDescription() const
 TMXTileAnimManager::TMXTileAnimManager(FastTMXLayer* layer)
 {
 	_layer = layer;
-	for (const auto& p : *_layer->getAnimTileCoord())
-	{
-		for (auto tilePos : p.second)
-		{
-			_tasks.pushBack(TMXTileAnimTask::create(_layer, _layer->getTileSet()->_animationInfo.at(p.first), tilePos));
+	
+	for(auto tileset : _layer->getTileSets()){
+		const auto animTileCoord = _layer->getAnimTileCoord(tileset);
+		
+		if(animTileCoord){
+			for (const auto& p : *animTileCoord)
+			{
+				for (auto tilePos : p.second)
+				{
+					_tasks.pushBack(TMXTileAnimTask::create(_layer, tileset->_animationInfo.at(p.first), tilePos));
+				}
+			}
 		}
+
 	}
 }
 

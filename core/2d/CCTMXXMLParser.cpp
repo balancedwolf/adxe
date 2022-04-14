@@ -704,27 +704,32 @@ void TMXMapInfo::endElement(void* /*ctx*/, const char* name)
                 ssize_t CC_UNUSED inflatedLen = ZipUtils::inflateMemoryWithHint(buffer, len, &deflated, sizeHint);
                 CCASSERT(inflatedLen == sizeHint, "inflatedLen should be equal to sizeHint!");
 
-                free(buffer);
-                buffer = nullptr;
-
-                if (!deflated)
-                {
-                    CCLOG("cocos2d: TiledMap: inflate data error");
-                    return;
-                }
+				
+				free(buffer);
+				buffer = nullptr;
+				
+				if (!deflated)
+				{
+					CCLOG("cocos2d: TiledMap: inflate data error");
+					return;
+				}
 				
 				ssize_t tilesSize = s.width * s.height;
 				
-				layer->_tiles.resize(tilesSize);
-				memcpy(layer->_tiles.data(), reinterpret_cast<uint32_t*>(buffer), layer->_tiles.size() * sizeof(uint32_t));
+				layer->_tiles = {
+					reinterpret_cast<uint32_t*>(deflated),
+					reinterpret_cast<uint32_t*>(deflated) + tilesSize };
+
             }
             else
             {
 				Vec2 s = layer->_layerSize;
-				ssize_t tilesSize = s.width * s.height;
 
-				layer->_tiles.resize(tilesSize);
-				memcpy(layer->_tiles.data(), reinterpret_cast<uint32_t*>(buffer), layer->_tiles.size() * sizeof(uint32_t));
+				ssize_t tilesSize = s.width * s.height;
+				
+				layer->_tiles = {
+					reinterpret_cast<uint32_t*>(buffer),
+					reinterpret_cast<uint32_t*>(buffer) + tilesSize };
 
             }
 

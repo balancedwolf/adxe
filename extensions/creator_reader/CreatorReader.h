@@ -32,8 +32,8 @@
 #include "Macros.h"
 #include "CreatorReader_generated.h"
 #include "collider/ColliderManager.h"
-#include "dragonbones/DragonBonesHeaders.h"
-#include "dragonbones/CCDragonBonesHeaders.h"
+#include "DragonBones/DragonBonesHeaders.h"
+#include "DragonBones/CCDragonBonesHeaders.h"
 
 
 

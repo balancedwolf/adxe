@@ -4,7 +4,6 @@ set(COCOS_2D_HEADER
     2d/CCActionTween.h
     2d/CCGrid.h
     2d/CCSpriteFrameCache.h
-    # 2d/CCTMXTiledMap.h
     2d/CCLayer.h
     2d/CCActionCamera.h
     2d/CCParticleExamples.h
@@ -35,6 +34,7 @@ set(COCOS_2D_HEADER
     2d/CCTextFieldTTF.h
     2d/CCAnimationCache.h
     2d/CCFastTMXLayer.h
+    #2d/CCTMXLayer.h
     2d/CCFontAtlasCache.h
     2d/CCFont.h
     2d/CCParticleSystemQuad.h
@@ -130,9 +130,7 @@ set(COCOS_2D_SRC
     2d/CCAutoPolygon.cpp
     2d/CCTextFieldTTF.cpp
     2d/CCTileMapAtlas.cpp
-    # 2d/CCTMXLayer.cpp
     2d/CCTMXObjectGroup.cpp
-    # 2d/CCTMXTiledMap.cpp
     2d/CCTMXXMLParser.cpp
     2d/CCTransition.cpp
     2d/CCTransitionPageTurn.cpp

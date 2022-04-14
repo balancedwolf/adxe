@@ -1,4 +1,8 @@
-/* Copyright (c) 2012 Scott Lembcke and Howling Moon Software
+/*
+ * cocos2d for iPhone: http://www.cocos2d-iphone.org
+ *
+ * Copyright (c) 2011 Ricardo Quesada
+ * Copyright (c) 2012 Zynga Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -15,43 +19,34 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 
-const char*  positionColorLengthTexture_vert = R"(
-
-#ifdef GL_ES
-precision lowp float;
-#endif
-
-#ifdef GL_ES
-attribute mediump vec4 a_position;
-attribute mediump vec2 a_texCoord;
-attribute mediump vec4 a_color;
-
-varying mediump vec4 v_color;
-varying mediump vec2 v_texcoord;
-
-#else
-
+const char* positionTextureColorTexIdx_vert = R"(
 attribute vec4 a_position;
 attribute vec2 a_texCoord;
 attribute vec4 a_color;
+attribute float a_texIdx;
 
-varying vec4 v_color;
-varying vec2 v_texcoord;
-
-#endif
-
-uniform float u_alpha;
 uniform mat4 u_MVPMatrix;
+
+#ifdef GL_ES
+varying lowp vec4 v_fragmentColor;
+varying mediump vec2 v_texCoord;
+varying lowp float v_texIdx;
+#else
+varying vec4 v_fragmentColor;
+varying vec2 v_texCoord;
+varying float v_texIdx;
+#endif
 
 void main()
 {
-    v_color = vec4(a_color.rgb * a_color.a * u_alpha, a_color.a * u_alpha);
-    v_texcoord = a_texCoord;
-
     gl_Position = u_MVPMatrix * a_position;
+    v_fragmentColor = a_color;
+    v_texCoord = a_texCoord;
+	v_texIdx = a_texIdx;
 }
 )";
+

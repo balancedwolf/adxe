@@ -294,7 +294,7 @@ bool Sprite::initWithTexture(Texture2D* texture, const Rect& rect, bool rotated)
     return result;
 }
 
-Sprite::Sprite()
+Sprite::Sprite() :_customTrianglesCommand(_trianglesCommand)
 {
 #if CC_SPRITE_DEBUG_DRAW
     _debugDrawNode = DrawNode::create();
@@ -373,9 +373,11 @@ void Sprite::setProgramState(uint32_t type)
 bool Sprite::setProgramState(backend::ProgramState* programState, bool needsRetain)
 {
     CCASSERT(programState, "argument should not be nullptr");
+
     if (Node::setProgramState(programState, needsRetain))
     {
-        auto& pipelineDescriptor        = _trianglesCommand.getPipelineDescriptor();
+		
+        auto& pipelineDescriptor        = _customTrianglesCommand.get().getPipelineDescriptor();
         pipelineDescriptor.programState = _programState;
 
         _mvpMatrixLocation = _programState->getUniformLocation(backend::Uniform::MVP_MATRIX);
@@ -1062,7 +1064,7 @@ void Sprite::draw(Renderer* renderer, const Mat4& transform, uint32_t flags)
     // TODO: arnold: current camera can be a non-default one.
     setMVPMatrixUniform();
 
-#if CC_USE_CULLING
+#if 0
     // Don't calculate the culling if the transform was not updated
     auto visitingCamera = Camera::getVisitingCamera();
     auto defaultCamera  = Camera::getDefaultCamera();
@@ -1079,8 +1081,8 @@ void Sprite::draw(Renderer* renderer, const Mat4& transform, uint32_t flags)
     if (_insideBounds)
 #endif
     {
-        _trianglesCommand.init(_globalZOrder, _texture, _blendFunc, _polyInfo.triangles, transform, flags);
-        renderer->addCommand(&_trianglesCommand);
+		_customTrianglesCommand.get().init(_globalZOrder, _texture, _blendFunc, _polyInfo.triangles, transform, flags);
+        renderer->addCommand(&_customTrianglesCommand.get());
 
 #if CC_SPRITE_DEBUG_DRAW
         _debugDrawNode->clear();
@@ -1345,8 +1347,12 @@ void Sprite::setIgnoreAnchorPointForPosition(bool value)
 
 void Sprite::setVisible(bool bVisible)
 {
+	bool wasVisible = Node::isVisible();
+	
     Node::setVisible(bVisible);
-    SET_DIRTY_RECURSIVELY();
+	if(wasVisible != bVisible){
+		SET_DIRTY_RECURSIVELY();
+	}
 }
 
 void Sprite::setContentSize(const Vec2& size)
@@ -1663,6 +1669,24 @@ void Sprite::setBatchNode(SpriteBatchNode* spriteBatchNode)
     }
 }
 
+void Sprite::setCustomTrianglesCommand(const std::reference_wrapper<TrianglesCommand>& command){
+	
+	if(&_customTrianglesCommand.get() != &command.get()){
+		_customTrianglesCommand = command;
+	}
+	
+	auto& pipelineDescriptor        = _customTrianglesCommand.get().getPipelineDescriptor();
+	
+	pipelineDescriptor.programState = _programState;
+	
+	_mvpMatrixLocation = _programState->getUniformLocation(backend::Uniform::MVP_MATRIX);
+	
+	setVertexLayout();
+	updateProgramStateTexture(_texture);
+	setMVPMatrixUniform();
+
+}
+
 // MARK: Texture protocol
 void Sprite::updateBlendFunc()
 {
@@ -1670,7 +1694,7 @@ void Sprite::updateBlendFunc()
              "CCSprite: updateBlendFunc doesn't work when the sprite is rendered using a SpriteBatchNode");
 
     // it is possible to have an untextured sprite
-    backend::BlendDescriptor& blendDescriptor = _trianglesCommand.getPipelineDescriptor().blendDescriptor;
+    backend::BlendDescriptor& blendDescriptor = _customTrianglesCommand.get().getPipelineDescriptor().blendDescriptor;
     blendDescriptor.blendEnabled              = true;
 
     if (!_texture || !_texture->hasPremultipliedAlpha())
@@ -1711,7 +1735,7 @@ void Sprite::setPolygonInfo(const PolygonInfo& info)
 void Sprite::setMVPMatrixUniform()
 {
     const auto& projectionMat = _director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-    auto programState         = _trianglesCommand.getPipelineDescriptor().programState;
+    auto programState         = _customTrianglesCommand.get().getPipelineDescriptor().programState;
     if (programState && _mvpMatrixLocation)
         programState->setUniform(_mvpMatrixLocation, projectionMat.m, sizeof(projectionMat.m));
 }

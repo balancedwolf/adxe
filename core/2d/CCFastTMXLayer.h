@@ -96,7 +96,8 @@ public:
      * @param mapInfo A map info.
      * @return Return an autorelease object.
      */
-    static FastTMXLayer* create(TMXTilesetInfo* tilesetInfo, TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);
+	static FastTMXLayer* create(TMXTilesetInfo* tilesetInfo, TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);
+	static FastTMXLayer* create(std::vector<TMXTilesetInfo*> tilesetInfos, TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);
     /**
      * @js ctor
      */
@@ -198,13 +199,13 @@ public:
      * @lua NA
      * @return The pointer to the map of tiles.
      */
-    const uint32_t* getTiles() const { return _tiles; };
+    std::vector<uint32_t>& getTiles() { return _tiles; };
 
     /** Set the pointer to the map of tiles.
      *
      * @param tiles The pointer to the map of tiles.
      */
-    void setTiles(uint32_t* tiles)
+    void setTiles(std::vector<uint32_t> tiles)
     {
         _tiles      = tiles;
         _quadsDirty = true;
@@ -291,6 +292,8 @@ public:
     bool hasTileAnimation() const { return !_animTileCoord.empty(); }
 
     TMXTileAnimManager* getTileAnimManager() const { return _tileAnimManager; }
+		
+	bool initWithTilesetInfos(std::vector<TMXTilesetInfo*> tilesetInfos, TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);
 
     bool initWithTilesetInfo(TMXTilesetInfo* tilesetInfo,
                                                      TMXLayerInfo* layerInfo,
@@ -328,9 +331,10 @@ protected:
     /** size of the layer in tiles */
     Vec2 _layerSize;
     /** size of the map's tile (could be different from the tile's size) */
-    Vec2 _mapTileSize;
+	Vec2 _mapTileSize;
+	Vec2 _mapSize;
     /** pointer to the map of tiles */
-    uint32_t* _tiles = nullptr;
+    std::vector<uint32_t> _tiles;
     /** Tileset information for the layer */
     TMXTilesetInfo* _tileSet = nullptr;
     /** Layer orientation, which is the same as the map orientation */
@@ -346,6 +350,12 @@ protected:
     TMXTileAnimManager* _tileAnimManager = nullptr;
 
     Texture2D* _texture = nullptr;
+	
+
+	std::vector<Texture2D*> _textures;
+	
+	std::vector<TMXTilesetInfo*> _tileSets;
+
 
     /** container for sprite children. map<index, pair<sprite, gid> > */
     std::map<int, std::pair<Sprite*, int>> _spriteContainer;
@@ -361,13 +371,9 @@ protected:
     Mat4 _tileToNodeTransform;
     /** data for rendering */
     bool _quadsDirty = true;
-    std::vector<int> _tileToQuadIndex;
-    std::vector<V3F_C4B_T2F_Quad> _totalQuads;
-#ifdef CC_FAST_TILEMAP_32_BIT_INDICES
+    std::vector<unsigned int> _tileToQuadIndex;
+    std::vector<V3F_C4B_T2F_FLOAT_Quad> _totalQuads;
     std::vector<unsigned int> _indices;
-#else
-    std::vector<unsigned short> _indices;
-#endif
     std::map<int /*vertexZ*/, int /*offset to _indices by quads*/> _indicesVertexZOffsets;
     std::unordered_map<int /*vertexZ*/, int /*number to quads*/> _indicesVertexZNumber;
     bool _dirty = true;

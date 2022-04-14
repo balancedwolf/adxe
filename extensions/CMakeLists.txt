@@ -22,7 +22,7 @@ else()
   set(AX_ENABLE_EXT_IMGUI OFF)
 endif()
 
-option(AX_ENABLE_EXT_CREATORREADER "Build extension creator reader" OFF)
+option(AX_ENABLE_EXT_CREATORREADER "Build extension creator reader" ON)
 
 
 if(BUILD_SHARED_LIBS)

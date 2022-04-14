@@ -186,11 +186,12 @@ public:
     ValueMap _properties;
     std::string _name;
     Vec2 _layerSize;
-    uint32_t* _tiles;
+    std::vector<uint32_t> _tiles;
     bool _visible;
     unsigned char _opacity;
     bool _ownTiles;
     Vec2 _offset;
+	int _index;
 };
 
 /** @brief TMXTilesetInfo contains the information about the tilesets like:

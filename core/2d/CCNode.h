@@ -1833,6 +1833,8 @@ public:
 
     virtual bool init();
 
+	uint32_t processParentFlags(const Mat4& parentTransform, uint32_t parentFlags);
+
 protected:
     /// lazy allocs
     void childrenAlloc();
@@ -1844,7 +1846,6 @@ protected:
     void detachChild(Node* child, ssize_t index, bool cleanup);
 
     Mat4 transform(const Mat4& parentTransform);
-    uint32_t processParentFlags(const Mat4& parentTransform, uint32_t parentFlags);
 
     virtual void updateCascadeOpacity();
     virtual void disableCascadeOpacity();

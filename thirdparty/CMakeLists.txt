@@ -30,7 +30,7 @@ option(AX_WITH_CARES "Build with internal c-ares support" OFF)
 option(AX_WITH_LLHTTP "Build with lhttp support" ON)
 option(AX_WITH_YAML_CPP "Build with yaml-cpp support" OFF)
 option(AX_WITH_KCP "Build with internal kcp support" OFF)
-option(AX_WITH_LUACPP "Build with luacpp support" ON)
+option(AX_WITH_LUACPP "Build with luacpp support" OFF)
 
 # by default, enable ios,macOS openal-soft framework for legal license LGPL-2.1
 option(ALSOFT_OSX_FRAMEWORK "" ON)

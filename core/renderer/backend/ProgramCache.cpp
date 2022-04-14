@@ -81,7 +81,8 @@ ProgramCache::~ProgramCache()
 
 bool ProgramCache::init()
 {
-    registerProgramFactory(ProgramType::POSITION_TEXTURE_COLOR, positionTextureColor_vert, positionTextureColor_frag);
+	registerProgramFactory(ProgramType::POSITION_TEXTURE_COLOR, positionTextureColor_vert, positionTextureColor_frag);
+	registerProgramFactory(ProgramType::POSITION_COLOR_TEXTUREIDX, positionTextureColorTexIdx_vert, positionTextureColorTexIdx_frag);
     registerProgramFactory(ProgramType::DUAL_SAMPLER, positionTextureColor_vert, dualSampler_frag);
     registerProgramFactory(ProgramType::LABEL_DISTANCE_NORMAL, positionTextureColor_vert, label_distanceNormal_frag);
     registerProgramFactory(ProgramType::LABEL_NORMAL, positionTextureColor_vert, label_normal_frag);
@@ -95,8 +96,10 @@ bool ProgramCache::init()
     registerProgramFactory(ProgramType::POSITION_COLOR, positionColor_vert, positionColor_frag);
     registerProgramFactory(ProgramType::LAYER_RADIA_GRADIENT, position_vert, layer_radialGradient_frag);
     registerProgramFactory(ProgramType::POSITION_TEXTURE, positionTexture_vert, positionTexture_frag);
-    registerProgramFactory(ProgramType::POSITION_TEXTURE_COLOR_ALPHA_TEST, positionTextureColor_vert,
-                           positionTextureColorAlphaTest_frag);
+	registerProgramFactory(ProgramType::POSITION_TEXTURE_COLOR_ALPHA_TEST, positionTextureColor_vert,
+						   positionTextureColorAlphaTest_frag);
+	registerProgramFactory(ProgramType::POSITION_COLOR_ALPHA_TEST_TEXTUREIDX, positionTextureColorTexIdx_vert,
+						   positionTextureColorAlphaTestTexIdx_frag);
     registerProgramFactory(ProgramType::POSITION_UCOLOR, positionUColor_vert, positionColor_frag);
     registerProgramFactory(ProgramType::DUAL_SAMPLER_GRAY, positionTextureColor_vert, dualSampler_gray_frag);
     registerProgramFactory(ProgramType::GRAY_SCALE, positionTextureColor_vert, grayScale_frag);

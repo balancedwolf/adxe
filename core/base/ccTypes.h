@@ -265,6 +265,21 @@ struct CC_DLL V3F_C4B_T2F
     Tex2F texCoords;  // 8 bytes
 };
 
+struct CC_DLL V3F_C4B_T2F_I1F
+{
+	/// vertices (3F)
+	Vec3 vertices;  // 12 bytes
+	
+	/// colors (4B)
+	Color4B colors;  // 4 bytes
+	
+	// tex coords (2F)
+	Tex2F texCoords;  // 8 bytes
+	
+	float texIdx = 0.0f;
+};
+
+
 /** @struct V3F_T2F
  * A Vec2 with a vertex point, a tex coord point.
  */
@@ -326,6 +341,22 @@ struct CC_DLL V3F_C4B_T2F_Quad
     /// bottom right
     V3F_C4B_T2F br;
 };
+
+/** @struct V3F_C4B_T2F_FLOAT_Quad
+ * 4 Vertex3FTex2FColor4B. TextureIndex
+ */
+struct CC_DLL V3F_C4B_T2F_FLOAT_Quad
+{
+	/// top left
+	V3F_C4B_T2F_I1F tl;
+	/// bottom left
+	V3F_C4B_T2F_I1F bl;
+	/// top right
+	V3F_C4B_T2F_I1F tr;
+	/// bottom right
+	V3F_C4B_T2F_I1F br;
+};
+
 
 /** @struct V2F_C4F_T2F_Quad
  * 4 Vertex2FTex2FColor4F Quad.

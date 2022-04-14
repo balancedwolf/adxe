@@ -5820,6 +5820,59 @@ int lua_cocos2dx_Node_setScaleX(lua_State* tolua_S)
 
     return 0;
 }
+int lua_cocos2dx_Node_processParentFlags(lua_State* tolua_S)
+{
+    int argc = 0;
+    cocos2d::Node* cobj = nullptr;
+    bool ok  = true;
+
+#if COCOS2D_DEBUG >= 1
+    tolua_Error tolua_err;
+#endif
+
+
+#if COCOS2D_DEBUG >= 1
+    if (!tolua_isusertype(tolua_S,1,"cc.Node",0,&tolua_err)) goto tolua_lerror;
+#endif
+
+    cobj = (cocos2d::Node*)tolua_tousertype(tolua_S,1,0);
+
+#if COCOS2D_DEBUG >= 1
+    if (!cobj) 
+    {
+        tolua_error(tolua_S,"invalid 'cobj' in function 'lua_cocos2dx_Node_processParentFlags'", nullptr);
+        return 0;
+    }
+#endif
+
+    argc = lua_gettop(tolua_S)-1;
+    if (argc == 2) 
+    {
+        cocos2d::Mat4 arg0;
+        unsigned int arg1;
+
+        ok &= luaval_to_mat4(tolua_S, 2, &arg0, "cc.Node:processParentFlags");
+
+        ok &= luaval_to_uint32(tolua_S, 3,&arg1, "cc.Node:processParentFlags");
+        if(!ok)
+        {
+            tolua_error(tolua_S,"invalid arguments in function 'lua_cocos2dx_Node_processParentFlags'", nullptr);
+            return 0;
+        }
+        unsigned int ret = cobj->processParentFlags(arg0, arg1);
+        tolua_pushnumber(tolua_S,(lua_Number)ret);
+        return 1;
+    }
+    luaL_error(tolua_S, "%s has wrong number of arguments: %d, was expecting %d \n", "cc.Node:processParentFlags",argc, 2);
+    return 0;
+
+#if COCOS2D_DEBUG >= 1
+    tolua_lerror:
+    tolua_error(tolua_S,"#ferror in function 'lua_cocos2dx_Node_processParentFlags'.",&tolua_err);
+#endif
+
+    return 0;
+}
 int lua_cocos2dx_Node_setRotationSkewX(lua_State* tolua_S)
 {
     int argc = 0;
@@ -11989,6 +12042,7 @@ int lua_register_cocos2dx_Node(lua_State* tolua_S)
         tolua_function(tolua_S,"setScaleZ",lua_cocos2dx_Node_setScaleZ);
         tolua_function(tolua_S,"setScaleY",lua_cocos2dx_Node_setScaleY);
         tolua_function(tolua_S,"setScaleX",lua_cocos2dx_Node_setScaleX);
+        tolua_function(tolua_S,"processParentFlags",lua_cocos2dx_Node_processParentFlags);
         tolua_function(tolua_S,"setRotationSkewX",lua_cocos2dx_Node_setRotationSkewX);
         tolua_function(tolua_S,"removeAllComponents",lua_cocos2dx_Node_removeAllComponents);
         tolua_function(tolua_S,"_setLocalZOrder",lua_cocos2dx_Node__setLocalZOrder);
@@ -76852,6 +76906,56 @@ int lua_cocos2dx_Sprite_getTextureRect(lua_State* tolua_S)
 
     return 0;
 }
+int lua_cocos2dx_Sprite_setCustomTrianglesCommand(lua_State* tolua_S)
+{
+    int argc = 0;
+    cocos2d::Sprite* cobj = nullptr;
+    bool ok  = true;
+
+#if COCOS2D_DEBUG >= 1
+    tolua_Error tolua_err;
+#endif
+
+
+#if COCOS2D_DEBUG >= 1
+    if (!tolua_isusertype(tolua_S,1,"cc.Sprite",0,&tolua_err)) goto tolua_lerror;
+#endif
+
+    cobj = (cocos2d::Sprite*)tolua_tousertype(tolua_S,1,0);
+
+#if COCOS2D_DEBUG >= 1
+    if (!cobj) 
+    {
+        tolua_error(tolua_S,"invalid 'cobj' in function 'lua_cocos2dx_Sprite_setCustomTrianglesCommand'", nullptr);
+        return 0;
+    }
+#endif
+
+    argc = lua_gettop(tolua_S)-1;
+    if (argc == 1) 
+    {
+        std::reference_wrapper<cocos2d::TrianglesCommand> arg0;
+
+        ok &= luaval_to_object<std::reference_wrapper<cocos2d::TrianglesCommand>>(tolua_S, 2, "std::reference_wrapper<cocos2d::TrianglesCommand>",&arg0, "cc.Sprite:setCustomTrianglesCommand");
+        if(!ok)
+        {
+            tolua_error(tolua_S,"invalid arguments in function 'lua_cocos2dx_Sprite_setCustomTrianglesCommand'", nullptr);
+            return 0;
+        }
+        cobj->setCustomTrianglesCommand(arg0);
+        lua_settop(tolua_S, 1);
+        return 1;
+    }
+    luaL_error(tolua_S, "%s has wrong number of arguments: %d, was expecting %d \n", "cc.Sprite:setCustomTrianglesCommand",argc, 1);
+    return 0;
+
+#if COCOS2D_DEBUG >= 1
+    tolua_lerror:
+    tolua_error(tolua_S,"#ferror in function 'lua_cocos2dx_Sprite_setCustomTrianglesCommand'.",&tolua_err);
+#endif
+
+    return 0;
+}
 int lua_cocos2dx_Sprite_initWithFile(lua_State* tolua_S)
 {
     int argc = 0;
@@ -77426,6 +77530,7 @@ int lua_register_cocos2dx_Sprite(lua_State* tolua_S)
         tolua_function(tolua_S,"setDirty",lua_cocos2dx_Sprite_setDirty);
         tolua_function(tolua_S,"isTextureRectRotated",lua_cocos2dx_Sprite_isTextureRectRotated);
         tolua_function(tolua_S,"getTextureRect",lua_cocos2dx_Sprite_getTextureRect);
+        tolua_function(tolua_S,"setCustomTrianglesCommand",lua_cocos2dx_Sprite_setCustomTrianglesCommand);
         tolua_function(tolua_S,"initWithFile",lua_cocos2dx_Sprite_initWithFile);
         tolua_function(tolua_S,"setBlendFunc",lua_cocos2dx_Sprite_setBlendFunc);
         tolua_function(tolua_S,"getTextureAtlas",lua_cocos2dx_Sprite_getTextureAtlas);
@@ -103589,6 +103694,62 @@ int lua_cocos2dx_FastTMXLayer_getProperty(lua_State* tolua_S)
 
     return 0;
 }
+int lua_cocos2dx_FastTMXLayer_initWithTilesetInfos(lua_State* tolua_S)
+{
+    int argc = 0;
+    cocos2d::FastTMXLayer* cobj = nullptr;
+    bool ok  = true;
+
+#if COCOS2D_DEBUG >= 1
+    tolua_Error tolua_err;
+#endif
+
+
+#if COCOS2D_DEBUG >= 1
+    if (!tolua_isusertype(tolua_S,1,"cc.FastTMXLayer",0,&tolua_err)) goto tolua_lerror;
+#endif
+
+    cobj = (cocos2d::FastTMXLayer*)tolua_tousertype(tolua_S,1,0);
+
+#if COCOS2D_DEBUG >= 1
+    if (!cobj) 
+    {
+        tolua_error(tolua_S,"invalid 'cobj' in function 'lua_cocos2dx_FastTMXLayer_initWithTilesetInfos'", nullptr);
+        return 0;
+    }
+#endif
+
+    argc = lua_gettop(tolua_S)-1;
+    if (argc == 3) 
+    {
+        std::vector<cocos2d::TMXTilesetInfo *> arg0;
+        cocos2d::TMXLayerInfo* arg1;
+        cocos2d::TMXMapInfo* arg2;
+
+        ok &= luaval_to_object<std::vector<cocos2d::TMXTilesetInfo >>(tolua_S, 2, "std::vector<cocos2d::TMXTilesetInfo *>",&arg0, "cc.FastTMXLayer:initWithTilesetInfos");
+
+        ok &= luaval_to_object<cocos2d::TMXLayerInfo>(tolua_S, 3, "cc.TMXLayerInfo",&arg1, "cc.FastTMXLayer:initWithTilesetInfos");
+
+        ok &= luaval_to_object<cocos2d::TMXMapInfo>(tolua_S, 4, "cc.TMXMapInfo",&arg2, "cc.FastTMXLayer:initWithTilesetInfos");
+        if(!ok)
+        {
+            tolua_error(tolua_S,"invalid arguments in function 'lua_cocos2dx_FastTMXLayer_initWithTilesetInfos'", nullptr);
+            return 0;
+        }
+        bool ret = cobj->initWithTilesetInfos(arg0, arg1, arg2);
+        tolua_pushboolean(tolua_S,(bool)ret);
+        return 1;
+    }
+    luaL_error(tolua_S, "%s has wrong number of arguments: %d, was expecting %d \n", "cc.FastTMXLayer:initWithTilesetInfos",argc, 3);
+    return 0;
+
+#if COCOS2D_DEBUG >= 1
+    tolua_lerror:
+    tolua_error(tolua_S,"#ferror in function 'lua_cocos2dx_FastTMXLayer_initWithTilesetInfos'.",&tolua_err);
+#endif
+
+    return 0;
+}
 int lua_cocos2dx_FastTMXLayer_setLayerSize(lua_State* tolua_S)
 {
     int argc = 0;
@@ -103884,7 +104045,6 @@ int lua_cocos2dx_FastTMXLayer_create(lua_State* tolua_S)
 {
     int argc = 0;
     bool ok  = true;
-
 #if COCOS2D_DEBUG >= 1
     tolua_Error tolua_err;
 #endif
@@ -103893,26 +104053,47 @@ int lua_cocos2dx_FastTMXLayer_create(lua_State* tolua_S)
     if (!tolua_isusertable(tolua_S,1,"cc.FastTMXLayer",0,&tolua_err)) goto tolua_lerror;
 #endif
 
-    argc = lua_gettop(tolua_S) - 1;
+    argc = lua_gettop(tolua_S)-1;
 
-    if (argc == 3)
+    do 
     {
-        cocos2d::TMXTilesetInfo* arg0;
-        cocos2d::TMXLayerInfo* arg1;
-        cocos2d::TMXMapInfo* arg2;
-        ok &= luaval_to_object<cocos2d::TMXTilesetInfo>(tolua_S, 2, "cc.TMXTilesetInfo",&arg0, "cc.FastTMXLayer:create");
-        ok &= luaval_to_object<cocos2d::TMXLayerInfo>(tolua_S, 3, "cc.TMXLayerInfo",&arg1, "cc.FastTMXLayer:create");
-        ok &= luaval_to_object<cocos2d::TMXMapInfo>(tolua_S, 4, "cc.TMXMapInfo",&arg2, "cc.FastTMXLayer:create");
-        if(!ok)
+        if (argc == 3)
         {
-            tolua_error(tolua_S,"invalid arguments in function 'lua_cocos2dx_FastTMXLayer_create'", nullptr);
-            return 0;
+            std::vector<cocos2d::TMXTilesetInfo *> arg0;
+            ok &= luaval_to_object<std::vector<cocos2d::TMXTilesetInfo >>(tolua_S, 2, "std::vector<cocos2d::TMXTilesetInfo *>",&arg0, "cc.FastTMXLayer:create");
+            if (!ok) { break; }
+            cocos2d::TMXLayerInfo* arg1;
+            ok &= luaval_to_object<cocos2d::TMXLayerInfo>(tolua_S, 3, "cc.TMXLayerInfo",&arg1, "cc.FastTMXLayer:create");
+            if (!ok) { break; }
+            cocos2d::TMXMapInfo* arg2;
+            ok &= luaval_to_object<cocos2d::TMXMapInfo>(tolua_S, 4, "cc.TMXMapInfo",&arg2, "cc.FastTMXLayer:create");
+            if (!ok) { break; }
+            cocos2d::FastTMXLayer* ret = cocos2d::FastTMXLayer::create(arg0, arg1, arg2);
+            object_to_luaval<cocos2d::FastTMXLayer>(tolua_S, "cc.FastTMXLayer",(cocos2d::FastTMXLayer*)ret);
+            return 1;
         }
-        cocos2d::FastTMXLayer* ret = cocos2d::FastTMXLayer::create(arg0, arg1, arg2);
-        object_to_luaval<cocos2d::FastTMXLayer>(tolua_S, "cc.FastTMXLayer",(cocos2d::FastTMXLayer*)ret);
-        return 1;
-    }
-    luaL_error(tolua_S, "%s has wrong number of arguments: %d, was expecting %d\n ", "cc.FastTMXLayer:create",argc, 3);
+    } while (0);
+    ok  = true;
+    do 
+    {
+        if (argc == 3)
+        {
+            cocos2d::TMXTilesetInfo* arg0;
+            ok &= luaval_to_object<cocos2d::TMXTilesetInfo>(tolua_S, 2, "cc.TMXTilesetInfo",&arg0, "cc.FastTMXLayer:create");
+            if (!ok) { break; }
+            cocos2d::TMXLayerInfo* arg1;
+            ok &= luaval_to_object<cocos2d::TMXLayerInfo>(tolua_S, 3, "cc.TMXLayerInfo",&arg1, "cc.FastTMXLayer:create");
+            if (!ok) { break; }
+            cocos2d::TMXMapInfo* arg2;
+            ok &= luaval_to_object<cocos2d::TMXMapInfo>(tolua_S, 4, "cc.TMXMapInfo",&arg2, "cc.FastTMXLayer:create");
+            if (!ok) { break; }
+            cocos2d::FastTMXLayer* ret = cocos2d::FastTMXLayer::create(arg0, arg1, arg2);
+            object_to_luaval<cocos2d::FastTMXLayer>(tolua_S, "cc.FastTMXLayer",(cocos2d::FastTMXLayer*)ret);
+            return 1;
+        }
+    } while (0);
+    ok  = true;
+    luaL_error(tolua_S, "%s has wrong number of arguments: %d, was expecting %d", "cc.FastTMXLayer:create",argc, 3);
     return 0;
 #if COCOS2D_DEBUG >= 1
     tolua_lerror:
@@ -103987,6 +104168,7 @@ int lua_register_cocos2dx_FastTMXLayer(lua_State* tolua_S)
         tolua_function(tolua_S,"setTileGID",lua_cocos2dx_FastTMXLayer_setTileGID);
         tolua_function(tolua_S,"getMapTileSize",lua_cocos2dx_FastTMXLayer_getMapTileSize);
         tolua_function(tolua_S,"getProperty",lua_cocos2dx_FastTMXLayer_getProperty);
+        tolua_function(tolua_S,"initWithTilesetInfos",lua_cocos2dx_FastTMXLayer_initWithTilesetInfos);
         tolua_function(tolua_S,"setLayerSize",lua_cocos2dx_FastTMXLayer_setLayerSize);
         tolua_function(tolua_S,"getLayerName",lua_cocos2dx_FastTMXLayer_getLayerName);
         tolua_function(tolua_S,"setTileSet",lua_cocos2dx_FastTMXLayer_setTileSet);

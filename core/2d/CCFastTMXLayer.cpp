@@ -57,10 +57,10 @@ const int FastTMXLayer::FAST_TMX_ORIENTATION_ORTHO = 0;
 const int FastTMXLayer::FAST_TMX_ORIENTATION_HEX   = 1;
 const int FastTMXLayer::FAST_TMX_ORIENTATION_ISO   = 2;
 
-FastTMXLayer* FastTMXLayer::create(std::vector<TMXTilesetInfo*> tilesetInfos, TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo)
+FastTMXLayer* FastTMXLayer::create(std::vector<TMXTilesetInfo*>* tilesetInfos, TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo)
 {
 	FastTMXLayer* ret = new FastTMXLayer();
-	if (ret->initWithTilesetInfos(tilesetInfos, layerInfo, mapInfo))
+	if (ret->initWithTilesetInfos(*tilesetInfos, layerInfo, mapInfo))
 	{
 		ret->autorelease();
 		return ret;
@@ -1057,7 +1057,7 @@ TMXTileAnimManager::TMXTileAnimManager(FastTMXLayer* layer)
 {
 	_layer = layer;
 	
-	for(auto tileset : _layer->getTileSets()){
+	for(auto tileset : *_layer->getTileSets()){
 		const auto animTileCoord = _layer->getAnimTileCoord(tileset);
 		
 		if(animTileCoord){

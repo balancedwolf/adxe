@@ -96,7 +96,7 @@ public:
      * @param mapInfo A map info.
      * @return Return an autorelease object.
      */
-	static FastTMXLayer* create(std::vector<TMXTilesetInfo*> tilesetInfos, TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);
+	static FastTMXLayer* create(std::vector<TMXTilesetInfo*>* tilesetInfos, TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);
     /**
      * @js ctor
      */
@@ -214,14 +214,16 @@ public:
      *
      * @return Tileset information for the layer.
      */
-    std::vector<TMXTilesetInfo*>& getTileSets() { return _tileSets; }
+    std::vector<TMXTilesetInfo*>* getTileSets() { return &_tileSets; }
 
     /** Set the tileset information for the layer.
      *
      * @param info The new tileset information for the layer.
      */
-    void setTileSets(std::vector<TMXTilesetInfo*> infos)
+    void setTileSets(std::vector<TMXTilesetInfo*>* infosPtr)
     {
+        auto infos = *infosPtr;
+
 		for(auto info : infos){
 			CC_SAFE_RETAIN(info);
 		}

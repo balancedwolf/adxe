@@ -103644,62 +103644,6 @@ int lua_cocos2dx_FastTMXLayer_getProperty(lua_State* tolua_S)
 
     return 0;
 }
-int lua_cocos2dx_FastTMXLayer_initWithTilesetInfos(lua_State* tolua_S)
-{
-    int argc = 0;
-    cocos2d::FastTMXLayer* cobj = nullptr;
-    bool ok  = true;
-
-#if COCOS2D_DEBUG >= 1
-    tolua_Error tolua_err;
-#endif
-
-
-#if COCOS2D_DEBUG >= 1
-    if (!tolua_isusertype(tolua_S,1,"cc.FastTMXLayer",0,&tolua_err)) goto tolua_lerror;
-#endif
-
-    cobj = (cocos2d::FastTMXLayer*)tolua_tousertype(tolua_S,1,0);
-
-#if COCOS2D_DEBUG >= 1
-    if (!cobj) 
-    {
-        tolua_error(tolua_S,"invalid 'cobj' in function 'lua_cocos2dx_FastTMXLayer_initWithTilesetInfos'", nullptr);
-        return 0;
-    }
-#endif
-
-    argc = lua_gettop(tolua_S)-1;
-    if (argc == 3) 
-    {
-        std::vector<cocos2d::TMXTilesetInfo *> arg0;
-        cocos2d::TMXLayerInfo* arg1;
-        cocos2d::TMXMapInfo* arg2;
-
-        ok &= luaval_to_object<std::vector<cocos2d::TMXTilesetInfo >>(tolua_S, 2, "std::vector<cocos2d::TMXTilesetInfo *>",&arg0, "cc.FastTMXLayer:initWithTilesetInfos");
-
-        ok &= luaval_to_object<cocos2d::TMXLayerInfo>(tolua_S, 3, "cc.TMXLayerInfo",&arg1, "cc.FastTMXLayer:initWithTilesetInfos");
-
-        ok &= luaval_to_object<cocos2d::TMXMapInfo>(tolua_S, 4, "cc.TMXMapInfo",&arg2, "cc.FastTMXLayer:initWithTilesetInfos");
-        if(!ok)
-        {
-            tolua_error(tolua_S,"invalid arguments in function 'lua_cocos2dx_FastTMXLayer_initWithTilesetInfos'", nullptr);
-            return 0;
-        }
-        bool ret = cobj->initWithTilesetInfos(arg0, arg1, arg2);
-        tolua_pushboolean(tolua_S,(bool)ret);
-        return 1;
-    }
-    luaL_error(tolua_S, "%s has wrong number of arguments: %d, was expecting %d \n", "cc.FastTMXLayer:initWithTilesetInfos",argc, 3);
-    return 0;
-
-#if COCOS2D_DEBUG >= 1
-    tolua_lerror:
-    tolua_error(tolua_S,"#ferror in function 'lua_cocos2dx_FastTMXLayer_initWithTilesetInfos'.",&tolua_err);
-#endif
-
-    return 0;
-}
 int lua_cocos2dx_FastTMXLayer_setLayerSize(lua_State* tolua_S)
 {
     int argc = 0;
@@ -104001,7 +103945,6 @@ int lua_register_cocos2dx_FastTMXLayer(lua_State* tolua_S)
         tolua_function(tolua_S,"setTileGID",lua_cocos2dx_FastTMXLayer_setTileGID);
         tolua_function(tolua_S,"getMapTileSize",lua_cocos2dx_FastTMXLayer_getMapTileSize);
         tolua_function(tolua_S,"getProperty",lua_cocos2dx_FastTMXLayer_getProperty);
-        tolua_function(tolua_S,"initWithTilesetInfos",lua_cocos2dx_FastTMXLayer_initWithTilesetInfos);
         tolua_function(tolua_S,"setLayerSize",lua_cocos2dx_FastTMXLayer_setLayerSize);
         tolua_function(tolua_S,"getLayerName",lua_cocos2dx_FastTMXLayer_getLayerName);
         tolua_function(tolua_S,"getTileAnimManager",lua_cocos2dx_FastTMXLayer_getTileAnimManager);

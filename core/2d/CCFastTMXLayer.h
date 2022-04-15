@@ -299,9 +299,10 @@ public:
 
     TMXTileAnimManager* getTileAnimManager() const { return _tileAnimManager; }
 		
-	bool initWithTilesetInfos(std::vector<TMXTilesetInfo*> tilesetInfos, TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);
 
 protected:
+    bool initWithTilesetInfos(std::vector<TMXTilesetInfo*> tilesetInfos, TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);
+
     /** Tileset information for the layer.
      *
      * @return Tileset information for the layer.

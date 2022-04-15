@@ -36,5 +36,6 @@ jobs:
         committer_name: GitHub Actions
         committer_email: 41898282+github-actions[bot]@users.noreply.github.com
         message: 'Committing genbindings changes [skip ci]'
+        pull_strategy: NO-PULL
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

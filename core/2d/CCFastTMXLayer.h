@@ -214,7 +214,7 @@ public:
      *
      * @return Tileset information for the layer.
      */
-    std::vector<TMXTilesetInfo*> getTileSets() { return _tileSets; }
+    std::vector<TMXTilesetInfo*>& getTileSets() { return _tileSets; }
 
     /** Set the tileset information for the layer.
      *

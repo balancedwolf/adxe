@@ -228,7 +228,6 @@ public:
 protected:
 	FastTMXLayer* parseLayer(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo, std::vector<TMXTilesetInfo*> tilesetInfos);
     TMXTilesetInfo* tilesetForLayer(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);
-	TMXLayerInfo* cloneLayer(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);
 	std::vector<TMXTilesetInfo*> tilesetsForLayer(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);
     void buildWithMapInfo(TMXMapInfo* mapInfo);
 

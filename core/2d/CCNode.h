@@ -1827,13 +1827,14 @@ public:
      */
     void resetChild(Node* child, bool cleanup);
 
+    virtual uint32_t processParentFlags(const Mat4& parentTransform, uint32_t parentFlags);
+
+
     // Nodes should be created using create();
     Node();
     virtual ~Node();
 
     virtual bool init();
-
-	uint32_t processParentFlags(const Mat4& parentTransform, uint32_t parentFlags);
 
 protected:
     /// lazy allocs
@@ -1866,6 +1867,8 @@ protected:
 
     void updateParentChildrenIndexer(int tag);
     void updateParentChildrenIndexer(std::string_view name);
+
+
 
 private:
     void addChildHelper(Node* child, int localZOrder, int tag, std::string_view name, bool setTag);

@@ -150,11 +150,6 @@ TMXTilesetInfo* FastTMXTiledMap::tilesetForLayer(TMXLayerInfo* layerInfo, TMXMap
     CCLOG("cocos2d: Warning: TMX Layer '%s' has no tiles", layerInfo->_name.c_str());
     return nullptr;
 }
-TMXLayerInfo* FastTMXTiledMap::cloneLayer(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo){
-	Size size = layerInfo->_layerSize;
-
-	
-}
 
 std::vector<TMXTilesetInfo*> FastTMXTiledMap::tilesetsForLayer(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo) {
 	

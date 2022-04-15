@@ -294,7 +294,7 @@ bool Sprite::initWithTexture(Texture2D* texture, const Rect& rect, bool rotated)
     return result;
 }
 
-Sprite::Sprite() :_customTrianglesCommand(_trianglesCommand)
+Sprite::Sprite()
 {
 #if CC_SPRITE_DEBUG_DRAW
     _debugDrawNode = DrawNode::create();
@@ -377,7 +377,7 @@ bool Sprite::setProgramState(backend::ProgramState* programState, bool needsReta
     if (Node::setProgramState(programState, needsRetain))
     {
 		
-        auto& pipelineDescriptor        = _customTrianglesCommand.get().getPipelineDescriptor();
+        auto& pipelineDescriptor        = _trianglesCommand.getPipelineDescriptor();
         pipelineDescriptor.programState = _programState;
 
         _mvpMatrixLocation = _programState->getUniformLocation(backend::Uniform::MVP_MATRIX);
@@ -1081,8 +1081,8 @@ void Sprite::draw(Renderer* renderer, const Mat4& transform, uint32_t flags)
     if (_insideBounds)
 #endif
     {
-		_customTrianglesCommand.get().init(_globalZOrder, _texture, _blendFunc, _polyInfo.triangles, transform, flags);
-        renderer->addCommand(&_customTrianglesCommand.get());
+		_trianglesCommand.init(_globalZOrder, _texture, _blendFunc, _polyInfo.triangles, transform, flags);
+        renderer->addCommand(&_trianglesCommand);
 
 #if CC_SPRITE_DEBUG_DRAW
         _debugDrawNode->clear();
@@ -1669,24 +1669,6 @@ void Sprite::setBatchNode(SpriteBatchNode* spriteBatchNode)
     }
 }
 
-void Sprite::setCustomTrianglesCommand(const std::reference_wrapper<TrianglesCommand>& command){
-	
-	if(&_customTrianglesCommand.get() != &command.get()){
-		_customTrianglesCommand = command;
-	}
-	
-	auto& pipelineDescriptor        = _customTrianglesCommand.get().getPipelineDescriptor();
-	
-	pipelineDescriptor.programState = _programState;
-	
-	_mvpMatrixLocation = _programState->getUniformLocation(backend::Uniform::MVP_MATRIX);
-	
-	setVertexLayout();
-	updateProgramStateTexture(_texture);
-	setMVPMatrixUniform();
-
-}
-
 // MARK: Texture protocol
 void Sprite::updateBlendFunc()
 {
@@ -1694,7 +1676,7 @@ void Sprite::updateBlendFunc()
              "CCSprite: updateBlendFunc doesn't work when the sprite is rendered using a SpriteBatchNode");
 
     // it is possible to have an untextured sprite
-    backend::BlendDescriptor& blendDescriptor = _customTrianglesCommand.get().getPipelineDescriptor().blendDescriptor;
+    backend::BlendDescriptor& blendDescriptor = _trianglesCommand.getPipelineDescriptor().blendDescriptor;
     blendDescriptor.blendEnabled              = true;
 
     if (!_texture || !_texture->hasPremultipliedAlpha())
@@ -1735,7 +1717,7 @@ void Sprite::setPolygonInfo(const PolygonInfo& info)
 void Sprite::setMVPMatrixUniform()
 {
     const auto& projectionMat = _director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-    auto programState         = _customTrianglesCommand.get().getPipelineDescriptor().programState;
+    auto programState         = _trianglesCommand.getPipelineDescriptor().programState;
     if (programState && _mvpMatrixLocation)
         programState->setUniform(_mvpMatrixLocation, projectionMat.m, sizeof(projectionMat.m));
 }

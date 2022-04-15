@@ -620,8 +620,6 @@ public:
 
     void setProgramState(uint32_t type) override;
 	
-	void setCustomTrianglesCommand(const std::reference_wrapper<TrianglesCommand>& command);
-
 protected:
     virtual void updateColor() override;
     virtual void setTextureCoords(const Rect& rect);
@@ -656,7 +654,6 @@ protected:
     Texture2D* _texture       = nullptr;  /// Texture2D object that is used to render the sprite
     SpriteFrame* _spriteFrame = nullptr;
     TrianglesCommand _trianglesCommand;
-	std::reference_wrapper<TrianglesCommand> _customTrianglesCommand;
 
     backend::UniformLocation _mvpMatrixLocation;
 #if CC_SPRITE_DEBUG_DRAW

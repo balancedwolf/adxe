@@ -89,24 +89,6 @@ public:
     static const int FAST_TMX_ORIENTATION_HEX;
     static const int FAST_TMX_ORIENTATION_ISO;
 
-    /** Creates a FastTMXLayer with an tileset info, a layer info and a map info.
-     *
-     * @param tilesetInfo An tileset info.
-     * @param layerInfo A layer info.
-     * @param mapInfo A map info.
-     * @return Return an autorelease object.
-     */
-	static FastTMXLayer* create(std::vector<TMXTilesetInfo*>* tilesetInfos, TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);
-    /**
-     * @js ctor
-     */
-    FastTMXLayer();
-    /**
-     * @js NA
-     * @lua NA
-     */
-    virtual ~FastTMXLayer();
-
     /** Returns the tile gid at a given tile coordinate. It also returns the tile flags.
      *
      * @param tileCoordinate The tile coordinate.
@@ -301,6 +283,26 @@ public:
 		
 
 protected:
+    /** Creates a FastTMXLayer with an tileset info, a layer info and a map info.
+     *
+     * @param tilesetInfo An tileset info.
+     * @param layerInfo A layer info.
+     * @param mapInfo A map info.
+     * @return Return an autorelease object.
+     */
+    static FastTMXLayer* create(cocos2d::Vector<TMXTilesetInfo*> tilesetInfos,
+                                TMXLayerInfo* layerInfo,
+                                TMXMapInfo* mapInfo);
+    /**
+     * @js ctor
+     */
+    FastTMXLayer();
+    /**
+     * @js NA
+     * @lua NA
+     */
+    virtual ~FastTMXLayer();
+
     bool initWithTilesetInfos(std::vector<TMXTilesetInfo*> tilesetInfos, TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);
 
     /** Tileset information for the layer.
@@ -414,6 +416,7 @@ protected:
     backend::UniformLocation _alphaValueLocation;
 
     friend class TMXTileAnimManager;
+    friend class FastTMXTiledMap;
 };
 
 /** @brief TMXTileAnimTask represents the frame-tick task of an animated tile.

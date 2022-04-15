@@ -102868,8 +102868,8 @@ int lua_cocos2dx_FastTMXLayer_getTileSets(lua_State* tolua_S)
             tolua_error(tolua_S,"invalid arguments in function 'lua_cocos2dx_FastTMXLayer_getTileSets'", nullptr);
             return 0;
         }
-        std::vector<cocos2d::TMXTilesetInfo *>& ret = cobj->getTileSets();
-        object_to_luaval<std::vector<cocos2d::TMXTilesetInfo >&>(tolua_S, "std::vector<cocos2d::TMXTilesetInfo *>",(std::vector<cocos2d::TMXTilesetInfo *>&)ret);
+        std::vector<cocos2d::TMXTilesetInfo *>* ret = cobj->getTileSets();
+        object_to_luaval<std::vector<cocos2d::TMXTilesetInfo >>(tolua_S, "std::vector<cocos2d::TMXTilesetInfo *>*",(std::vector<cocos2d::TMXTilesetInfo *>*)ret);
         return 1;
     }
     luaL_error(tolua_S, "%s has wrong number of arguments: %d, was expecting %d \n", "cc.FastTMXLayer:getTileSets",argc, 0);
@@ -103555,9 +103555,9 @@ int lua_cocos2dx_FastTMXLayer_setTileSets(lua_State* tolua_S)
     argc = lua_gettop(tolua_S)-1;
     if (argc == 1) 
     {
-        std::vector<cocos2d::TMXTilesetInfo *> arg0;
+        std::vector<cocos2d::TMXTilesetInfo *>* arg0;
 
-        ok &= luaval_to_object<std::vector<cocos2d::TMXTilesetInfo >>(tolua_S, 2, "std::vector<cocos2d::TMXTilesetInfo *>",&arg0, "cc.FastTMXLayer:setTileSets");
+        ok &= luaval_to_object<std::vector<cocos2d::TMXTilesetInfo >>(tolua_S, 2, "std::vector<cocos2d::TMXTilesetInfo *>*",&arg0, "cc.FastTMXLayer:setTileSets");
         if(!ok)
         {
             tolua_error(tolua_S,"invalid arguments in function 'lua_cocos2dx_FastTMXLayer_setTileSets'", nullptr);
@@ -104008,10 +104008,10 @@ int lua_cocos2dx_FastTMXLayer_create(lua_State* tolua_S)
 
     if (argc == 3)
     {
-        std::vector<cocos2d::TMXTilesetInfo *> arg0;
+        std::vector<cocos2d::TMXTilesetInfo *>* arg0;
         cocos2d::TMXLayerInfo* arg1;
         cocos2d::TMXMapInfo* arg2;
-        ok &= luaval_to_object<std::vector<cocos2d::TMXTilesetInfo >>(tolua_S, 2, "std::vector<cocos2d::TMXTilesetInfo *>",&arg0, "cc.FastTMXLayer:create");
+        ok &= luaval_to_object<std::vector<cocos2d::TMXTilesetInfo >>(tolua_S, 2, "std::vector<cocos2d::TMXTilesetInfo *>*",&arg0, "cc.FastTMXLayer:create");
         ok &= luaval_to_object<cocos2d::TMXLayerInfo>(tolua_S, 3, "cc.TMXLayerInfo",&arg1, "cc.FastTMXLayer:create");
         ok &= luaval_to_object<cocos2d::TMXMapInfo>(tolua_S, 4, "cc.TMXMapInfo",&arg2, "cc.FastTMXLayer:create");
         if(!ok)

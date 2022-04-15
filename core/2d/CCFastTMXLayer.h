@@ -210,31 +210,6 @@ public:
         _quadsDirty = true;
     };
 
-    /** Tileset information for the layer.
-     *
-     * @return Tileset information for the layer.
-     */
-    std::vector<TMXTilesetInfo*>* getTileSets() { return &_tileSets; }
-
-    /** Set the tileset information for the layer.
-     *
-     * @param info The new tileset information for the layer.
-     */
-    void setTileSets(std::vector<TMXTilesetInfo*>* infosPtr)
-    {
-        auto infos = *infosPtr;
-
-		for(auto info : infos){
-			CC_SAFE_RETAIN(info);
-		}
-		
-		for(auto info : _tileSets){
-			CC_SAFE_RELEASE(info);
-		}
-
-		_tileSets = infos;
-    }
-
     /** Layer orientation, which is the same as the map orientation.
      *
      * @return Layer orientation, which is the same as the map orientation.
@@ -327,6 +302,31 @@ public:
 	bool initWithTilesetInfos(std::vector<TMXTilesetInfo*> tilesetInfos, TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);
 
 protected:
+    /** Tileset information for the layer.
+     *
+     * @return Tileset information for the layer.
+     */
+    std::vector<TMXTilesetInfo*>* getTileSets() { return &_tileSets; }
+
+    /** Set the tileset information for the layer.
+     *
+     * @param info The new tileset information for the layer.
+     */
+    void setTileSets(std::vector<TMXTilesetInfo*>* infosPtr)
+    {
+        auto infos = *infosPtr;
+
+		for(auto info : infos){
+			CC_SAFE_RETAIN(info);
+		}
+		
+		for(auto info : _tileSets){
+			CC_SAFE_RELEASE(info);
+		}
+
+		_tileSets = infos;
+    }
+
     virtual void setOpacity(uint8_t opacity) override;
 
     void updateTiles(const Rect& culledRect);
@@ -411,6 +411,8 @@ protected:
     backend::UniformLocation _mvpMatrixLocaiton;
     backend::UniformLocation _textureLocation;
     backend::UniformLocation _alphaValueLocation;
+
+    friend class TMXTileAnimManager;
 };
 
 /** @brief TMXTileAnimTask represents the frame-tick task of an animated tile.

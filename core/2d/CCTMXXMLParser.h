@@ -186,7 +186,7 @@ public:
     ValueMap _properties;
     std::string _name;
     Vec2 _layerSize;
-    std::vector<uint32_t> _tiles;
+    uint32_t* _tiles;
     bool _visible;
     unsigned char _opacity;
     bool _ownTiles;

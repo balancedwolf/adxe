@@ -226,9 +226,7 @@ public:
     bool initWithXML(std::string_view tmxString, std::string_view resourcePath);
 
 protected:
-	FastTMXLayer* parseLayer(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo, std::vector<TMXTilesetInfo*> tilesetInfos);
-    TMXTilesetInfo* tilesetForLayer(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);
-	std::vector<TMXTilesetInfo*> tilesetsForLayer(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);
+	FastTMXLayer* parseLayer(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);
     void buildWithMapInfo(TMXMapInfo* mapInfo);
 
     /** the map's size property measured in tiles */

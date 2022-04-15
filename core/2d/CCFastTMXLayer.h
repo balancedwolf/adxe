@@ -89,6 +89,24 @@ public:
     static const int FAST_TMX_ORIENTATION_HEX;
     static const int FAST_TMX_ORIENTATION_ISO;
 
+    /** Creates a FastTMXLayer with an tileset info, a layer info and a map info.
+     *
+     * @param tilesetInfo An tileset info.
+     * @param layerInfo A layer info.
+     * @param mapInfo A map info.
+     * @return Return an autorelease object.
+     */
+	static FastTMXLayer* create(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);
+    /**
+     * @js ctor
+     */
+    FastTMXLayer();
+    /**
+     * @js NA
+     * @lua NA
+     */
+    virtual ~FastTMXLayer();
+
     /** Returns the tile gid at a given tile coordinate. It also returns the tile flags.
      *
      * @param tileCoordinate The tile coordinate.
@@ -180,17 +198,40 @@ public:
      * @lua NA
      * @return The pointer to the map of tiles.
      */
-    std::vector<uint32_t>& getTiles() { return _tiles; };
+    uint32_t* getTiles() { return _tiles; };
 
     /** Set the pointer to the map of tiles.
      *
      * @param tiles The pointer to the map of tiles.
      */
-    void setTiles(std::vector<uint32_t> tiles)
+    void setTiles(uint32_t* tiles)
     {
         _tiles      = tiles;
         _quadsDirty = true;
     };
+
+    /** Tileset information for the layer.
+     *
+     * @return Tileset information for the layer.
+     */
+    std::vector<TMXTilesetInfo*>& getTileSets() { return _tileSets; }
+
+    /** Set the tileset information for the layer.
+     *
+     * @param info The new tileset information for the layer.
+     */
+    void setTileSets(std::vector<TMXTilesetInfo*> infos)
+    {
+		for(auto info : infos){
+			CC_SAFE_RETAIN(info);
+		}
+		
+		for(auto info : _tileSets){
+			CC_SAFE_RELEASE(info);
+		}
+
+		_tileSets = infos;
+    }
 
     /** Layer orientation, which is the same as the map orientation.
      *
@@ -261,75 +302,16 @@ public:
 		
 	}
 	
-	int getTextureIndexFromGid(int tileGID){
-		int textureIndex = _tileSets.size();
-		
-		for (std::vector<TMXTilesetInfo*>::reverse_iterator i = _tileSets.rbegin();
-			 i != _tileSets.rend(); ++i) {
-			textureIndex--;
-			
-			if (tileGID >= (*i)->_firstGid) {
-				break;
-			}
-		}
-		
-		return textureIndex;
-	}
+	int getTextureIndexFromGid(int tileGID);
 
 	bool hasTileAnimation() { return !_animTileCoord.empty(); }
 	bool hasTileAnimation(TMXTilesetInfo* tileset) { return !_animTileCoord[tileset].empty(); }
 
     TMXTileAnimManager* getTileAnimManager() const { return _tileAnimManager; }
 		
+	bool initWithLayerInfo(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);
 
 protected:
-    /** Creates a FastTMXLayer with an tileset info, a layer info and a map info.
-     *
-     * @param tilesetInfo An tileset info.
-     * @param layerInfo A layer info.
-     * @param mapInfo A map info.
-     * @return Return an autorelease object.
-     */
-    static FastTMXLayer* create(cocos2d::Vector<TMXTilesetInfo*> tilesetInfos,
-                                TMXLayerInfo* layerInfo,
-                                TMXMapInfo* mapInfo);
-    /**
-     * @js ctor
-     */
-    FastTMXLayer();
-    /**
-     * @js NA
-     * @lua NA
-     */
-    virtual ~FastTMXLayer();
-
-    bool initWithTilesetInfos(std::vector<TMXTilesetInfo*> tilesetInfos, TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo);
-
-    /** Tileset information for the layer.
-     *
-     * @return Tileset information for the layer.
-     */
-    std::vector<TMXTilesetInfo*>* getTileSets() { return &_tileSets; }
-
-    /** Set the tileset information for the layer.
-     *
-     * @param info The new tileset information for the layer.
-     */
-    void setTileSets(std::vector<TMXTilesetInfo*>* infosPtr)
-    {
-        auto infos = *infosPtr;
-
-		for(auto info : infos){
-			CC_SAFE_RETAIN(info);
-		}
-		
-		for(auto info : _tileSets){
-			CC_SAFE_RELEASE(info);
-		}
-
-		_tileSets = infos;
-    }
-
     virtual void setOpacity(uint8_t opacity) override;
 
     void updateTiles(const Rect& culledRect);
@@ -364,7 +346,7 @@ protected:
 	Vec2 _mapTileSize;
 	Vec2 _mapSize;
     /** pointer to the map of tiles */
-    std::vector<uint32_t> _tiles;
+    uint32_t* _tiles;
     /** Layer orientation, which is the same as the map orientation */
     int _layerOrientation = FAST_TMX_ORIENTATION_ORTHO;
     int _staggerAxis      = TMXStaggerAxis_Y;
@@ -414,9 +396,6 @@ protected:
     backend::UniformLocation _mvpMatrixLocaiton;
     backend::UniformLocation _textureLocation;
     backend::UniformLocation _alphaValueLocation;
-
-    friend class TMXTileAnimManager;
-    friend class FastTMXTiledMap;
 };
 
 /** @brief TMXTileAnimTask represents the frame-tick task of an animated tile.

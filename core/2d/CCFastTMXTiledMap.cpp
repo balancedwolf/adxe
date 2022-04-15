@@ -94,107 +94,18 @@ FastTMXTiledMap::FastTMXTiledMap() : _mapSize(Vec2::ZERO), _tileSize(Vec2::ZERO)
 FastTMXTiledMap::~FastTMXTiledMap() {}
 
 // private
-FastTMXLayer* FastTMXTiledMap::parseLayer(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo, std::vector<TMXTilesetInfo*> tilesets)
+FastTMXLayer* FastTMXTiledMap::parseLayer(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo)
 {
-	if (tilesets.size() == 0)
+    if (mapInfo->getTilesets().empty())
 		return nullptr;
 	
-	FastTMXLayer* layer = FastTMXLayer::create(&tilesets, layerInfo, mapInfo);
+	FastTMXLayer* layer = FastTMXLayer::create(layerInfo, mapInfo);
 	
 	// tell the layerinfo to release the ownership of the tiles map.
-	layerInfo->_ownTiles = false;
+	layerInfo->_ownTiles = true;
 	layer->setupTiles();
 	
 	return layer;
-}
-
-TMXTilesetInfo* FastTMXTiledMap::tilesetForLayer(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo)
-{
-    Vec2 size      = layerInfo->_layerSize;
-    auto& tilesets = mapInfo->getTilesets();
-
-    for (auto iter = tilesets.crbegin(), iterCrend = tilesets.crend(); iter != iterCrend; ++iter)
-    {
-        TMXTilesetInfo* tilesetInfo = *iter;
-        if (tilesetInfo)
-        {
-            for (int y = 0; y < size.height; y++)
-            {
-                for (int x = 0; x < size.width; x++)
-                {
-                    uint32_t pos = static_cast<uint32_t>(x + size.width * y);
-                    uint32_t gid = layerInfo->_tiles[pos];
-
-                    // gid are stored in little endian.
-                    // if host is big endian, then swap
-                    // if( o == CFByteOrderBigEndian )
-                    //    gid = CFSwapInt32( gid );
-                    /* We support little endian.*/
-
-                    // FIXME: gid == 0 --> empty tile
-                    if (gid != 0)
-                    {
-                        // Optimization: quick return
-                        // if the layer is invalid (more than 1 tileset per layer) an CCAssert will be thrown later
-                        if ((gid & kTMXFlippedMask) >= static_cast<uint32_t>(tilesetInfo->_firstGid))
-                        {
-                            return tilesetInfo;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // If all the tiles are 0, return empty tileset
-    CCLOG("cocos2d: Warning: TMX Layer '%s' has no tiles", layerInfo->_name.c_str());
-    return nullptr;
-}
-
-std::vector<TMXTilesetInfo*> FastTMXTiledMap::tilesetsForLayer(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo) {
-	
-	Size size = layerInfo->_layerSize;
-	auto& tilesets = mapInfo->getTilesets();
-	
-	std::vector<TMXTilesetInfo*> tilesetInfos;
-	
-	for (auto iter = tilesets.crbegin(), iterCrend = tilesets.crend(); iter != iterCrend; ++iter)
-	{
-		TMXTilesetInfo* tilesetInfo = *iter;
-		if (tilesetInfo)
-		{
-			for (int y = 0; y < size.height; y++)
-			{
-				for (int x = 0; x < size.width; x++)
-				{
-					uint32_t pos = static_cast<uint32_t>(x + size.width * y);
-					uint32_t gid = layerInfo->_tiles[pos];
-					
-					// gid are stored in little endian.
-					// if host is big endian, then swap
-					//if( o == CFByteOrderBigEndian )
-					//    gid = CFSwapInt32( gid );
-					/* We support little endian.*/
-					
-					// FIXME: gid == 0 --> empty tile
-					if (gid != 0)
-					{
-						// Optimization: quick return
-						// if the layer is invalid (more than 1 tileset per layer) an CCAssert will be thrown later
-						if ((gid & kTMXFlippedMask)
-							>= static_cast<uint32_t>(tilesetInfo->_firstGid))
-						{
-							if (std::find(tilesetInfos.begin(), tilesetInfos.end(), tilesetInfo) == tilesetInfos.end()) {
-								tilesetInfos.push_back(tilesetInfo);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	
-	return tilesetInfos;
 }
 
 void FastTMXTiledMap::buildWithMapInfo(TMXMapInfo* mapInfo)
@@ -216,8 +127,7 @@ void FastTMXTiledMap::buildWithMapInfo(TMXMapInfo* mapInfo)
     {
         if (layerInfo->_visible)
         {
-			auto tilesets = tilesetsForLayer(layerInfo, mapInfo);
-			FastTMXLayer* child = parseLayer(layerInfo, mapInfo, tilesets);
+			FastTMXLayer* child = parseLayer(layerInfo, mapInfo);
 			if (child == nullptr)
 			{
 				idx++;

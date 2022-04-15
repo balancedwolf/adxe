@@ -57,10 +57,10 @@ const int FastTMXLayer::FAST_TMX_ORIENTATION_ORTHO = 0;
 const int FastTMXLayer::FAST_TMX_ORIENTATION_HEX   = 1;
 const int FastTMXLayer::FAST_TMX_ORIENTATION_ISO   = 2;
 
-FastTMXLayer* FastTMXLayer::create(std::vector<TMXTilesetInfo*>* tilesetInfos, TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo)
+FastTMXLayer* FastTMXLayer::create(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo)
 {
 	FastTMXLayer* ret = new FastTMXLayer();
-	if (ret->initWithTilesetInfos(*tilesetInfos, layerInfo, mapInfo))
+    if (ret->initWithLayerInfo(layerInfo, mapInfo))
 	{
 		ret->autorelease();
 		return ret;
@@ -69,8 +69,49 @@ FastTMXLayer* FastTMXLayer::create(std::vector<TMXTilesetInfo*>* tilesetInfos, T
 	return nullptr;
 }
 
-bool FastTMXLayer::initWithTilesetInfos(std::vector<TMXTilesetInfo*> tilesetInfos, TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo){
+bool FastTMXLayer::initWithLayerInfo(TMXLayerInfo* layerInfo, TMXMapInfo* mapInfo){
 	
+	Size size      = layerInfo->_layerSize;
+    auto& tilesets = mapInfo->getTilesets();
+
+    std::vector<TMXTilesetInfo*> tilesetInfos;
+
+    for (auto iter = tilesets.crbegin(), iterCrend = tilesets.crend(); iter != iterCrend; ++iter)
+    {
+        TMXTilesetInfo* tilesetInfo = *iter;
+        if (tilesetInfo)
+        {
+            for (int y = 0; y < size.height; y++)
+            {
+                for (int x = 0; x < size.width; x++)
+                {
+                    uint32_t pos = static_cast<uint32_t>(x + size.width * y);
+                    uint32_t gid = layerInfo->_tiles[pos];
+
+                    // gid are stored in little endian.
+                    // if host is big endian, then swap
+                    // if( o == CFByteOrderBigEndian )
+                    //    gid = CFSwapInt32( gid );
+                    /* We support little endian.*/
+
+                    // FIXME: gid == 0 --> empty tile
+                    if (gid != 0)
+                    {
+                        // Optimization: quick return
+                        // if the layer is invalid (more than 1 tileset per layer) an CCAssert will be thrown later
+                        if ((gid & kTMXFlippedMask) >= static_cast<uint32_t>(tilesetInfo->_firstGid))
+                        {
+                            if (std::find(tilesetInfos.begin(), tilesetInfos.end(), tilesetInfo) == tilesetInfos.end())
+                            {
+                                tilesetInfos.push_back(tilesetInfo);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 	// tilesetInfo
 	_tileSets = tilesetInfos;
 	
@@ -722,13 +763,30 @@ void FastTMXLayer::updateTotalQuads()
 	}
 }
 
+int FastTMXLayer::getTextureIndexFromGid(int tileGID)
+{
+    int textureIndex = static_cast<int>(_tileSets.size());
+
+    for (std::vector<TMXTilesetInfo*>::reverse_iterator i = _tileSets.rbegin(); i != _tileSets.rend(); ++i)
+    {
+        textureIndex--;
+
+        if (tileGID >= (*i)->_firstGid)
+        {
+            break;
+        }
+    }
+
+    return textureIndex;
+}
+
 // removing / getting tiles
 Sprite* FastTMXLayer::getTileAt(const Vec2& tileCoordinate)
 {
 	CCASSERT(tileCoordinate.x < _layerSize.width && tileCoordinate.y < _layerSize.height && tileCoordinate.x >= 0 &&
 			 tileCoordinate.y >= 0,
 			 "TMXLayer: invalid position");
-	CCASSERT(_tiles.size() > 0, "TMXLayer: the tiles map has been released");
+    CCASSERT(_tiles, "TMXLayer: the tiles map has been released");
 	
 	Sprite* tile = nullptr;
 	int gid      = this->getTileGIDAt(tileCoordinate);
@@ -773,7 +831,7 @@ int FastTMXLayer::getTileGIDAt(const Vec2& tileCoordinate, TMXTileFlags* flags /
 	CCASSERT(tileCoordinate.x < _layerSize.width && tileCoordinate.y < _layerSize.height && tileCoordinate.x >= 0 &&
 			 tileCoordinate.y >= 0,
 			 "TMXLayer: invalid position");
-	CCASSERT(_tiles.size() > 0, "TMXLayer: the tiles map has been released");
+    CCASSERT(_tiles, "TMXLayer: the tiles map has been released");
 	
 	int idx = static_cast<int>(((int)tileCoordinate.x + (int)tileCoordinate.y * _layerSize.width));
 	
@@ -939,8 +997,8 @@ void FastTMXLayer::setTileGID(int gid, const Vec2& tileCoordinate, TMXTileFlags 
 	CCASSERT(tileCoordinate.x < _layerSize.width && tileCoordinate.y < _layerSize.height && tileCoordinate.x >= 0 &&
 			 tileCoordinate.y >= 0,
 			 "TMXLayer: invalid position");
-	CCASSERT(_tiles.size() > 0, "TMXLayer: the tiles map has been released");
-	CCASSERT(gid == 0, "TMXLayer: invalid gid");
+    CCASSERT(_tiles, "TMXLayer: the tiles map has been released");
+    CCASSERT(gid == 0, "TMXLayer: invalid gid");
 	
 	TMXTileFlags currentFlags;
 	int currentGID = getTileGIDAt(tileCoordinate, &currentFlags);
@@ -1057,7 +1115,7 @@ TMXTileAnimManager::TMXTileAnimManager(FastTMXLayer* layer)
 {
 	_layer = layer;
 	
-	for(auto tileset : *_layer->getTileSets()){
+	for(auto tileset : _layer->getTileSets()){
 		const auto animTileCoord = _layer->getAnimTileCoord(tileset);
 		
 		if(animTileCoord){

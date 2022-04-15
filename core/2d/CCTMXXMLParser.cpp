@@ -41,11 +41,16 @@ using namespace std;
 NS_CC_BEGIN
 
 // implementation TMXLayerInfo
-TMXLayerInfo::TMXLayerInfo() : _name(""), _tiles(), _ownTiles(true), _index(0) {}
+TMXLayerInfo::TMXLayerInfo() : _name(""), _tiles(nullptr), _ownTiles(true) {}
 
 TMXLayerInfo::~TMXLayerInfo()
 {
     CCLOGINFO("deallocing TMXLayerInfo: %p", this);
+    if (_ownTiles && _tiles)
+    {
+        free(_tiles);
+        _tiles = nullptr;
+    }
 }
 
 ValueMap& TMXLayerInfo::getProperties()
@@ -73,8 +78,7 @@ Rect TMXTilesetInfo::getRectForGID(uint32_t gid)
     rect.size = _tileSize;
     gid &= kTMXFlippedMask;
     gid = gid - _firstGid;
-
-	// max_x means the column count in tile map
+    // max_x means the column count in tile map
     // in the origin:
     // max_x = (int)((_imageSize.width - _margin*2 + _spacing) / (_tileSize.width + _spacing));
     // but in editor "Tiled", _margin variable only effect the left side
@@ -441,9 +445,9 @@ void TMXMapInfo::startElement(void* /*ctx*/, const char* name, const char** atts
             Vec2 layerSize      = layer->_layerSize;
             int tilesAmount     = static_cast<int>(layerSize.width * layerSize.height);
 
-            std::vector<uint32_t> tiles;
+            uint32_t* tiles = (uint32_t*)malloc(tilesAmount * sizeof(uint32_t));
             // set all value to 0
-			tiles.resize(tilesAmount);
+            memset(tiles, 0, tilesAmount * sizeof(int));
 
             layer->_tiles = tiles;
         }
@@ -704,33 +708,20 @@ void TMXMapInfo::endElement(void* /*ctx*/, const char* name)
                 ssize_t CC_UNUSED inflatedLen = ZipUtils::inflateMemoryWithHint(buffer, len, &deflated, sizeHint);
                 CCASSERT(inflatedLen == sizeHint, "inflatedLen should be equal to sizeHint!");
 
-				
-				free(buffer);
-				buffer = nullptr;
-				
-				if (!deflated)
-				{
-					CCLOG("cocos2d: TiledMap: inflate data error");
-					return;
-				}
-				
-				ssize_t tilesSize = s.width * s.height;
-				
-				layer->_tiles = {
-					reinterpret_cast<uint32_t*>(deflated),
-					reinterpret_cast<uint32_t*>(deflated) + tilesSize };
+                free(buffer);
+                buffer = nullptr;
 
+                if (!deflated)
+                {
+                    CCLOG("cocos2d: TiledMap: inflate data error");
+                    return;
+                }
+
+                layer->_tiles = reinterpret_cast<uint32_t*>(deflated);
             }
             else
             {
-				Vec2 s = layer->_layerSize;
-
-				ssize_t tilesSize = s.width * s.height;
-				
-				layer->_tiles = {
-					reinterpret_cast<uint32_t*>(buffer),
-					reinterpret_cast<uint32_t*>(buffer) + tilesSize };
-
+                layer->_tiles = reinterpret_cast<uint32_t*>(buffer);
             }
 
             tmxMapInfo->setCurrentString("");
@@ -758,9 +749,8 @@ void TMXMapInfo::endElement(void* /*ctx*/, const char* name)
                 }
             }
 
-			uint32_t sizeofTiles = gidTokens.size();
             // 32-bits per gid
-            buffer = (unsigned char*)malloc(sizeofTiles * sizeof(uint32_t));
+            buffer = (unsigned char*)malloc(gidTokens.size() * 4);
             if (!buffer)
             {
                 CCLOG("cocos2d: TiledMap: CSV buffer not allocated.");
@@ -774,10 +764,8 @@ void TMXMapInfo::endElement(void* /*ctx*/, const char* name)
                 *bufferPtr   = tileGid;
                 bufferPtr++;
             }
-			
-			layer->_tiles = {
-				reinterpret_cast<uint32_t*>(buffer),
-				reinterpret_cast<uint32_t*>(buffer) + gidTokens.size() };
+
+            layer->_tiles = reinterpret_cast<uint32_t*>(buffer);
 
             tmxMapInfo->setCurrentString("");
         }

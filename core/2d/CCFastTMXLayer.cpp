@@ -74,7 +74,7 @@ bool FastTMXLayer::initWithLayerInfo(TMXLayerInfo* layerInfo, TMXMapInfo* mapInf
 	Size size      = layerInfo->_layerSize;
     auto& tilesets = mapInfo->getTilesets();
 
-    std::vector<TMXTilesetInfo*> tilesetInfos;
+    Vector<TMXTilesetInfo*> tilesetInfos;
 
     for (auto iter = tilesets.crbegin(), iterCrend = tilesets.crend(); iter != iterCrend; ++iter)
     {
@@ -103,7 +103,7 @@ bool FastTMXLayer::initWithLayerInfo(TMXLayerInfo* layerInfo, TMXMapInfo* mapInf
                         {
                             if (std::find(tilesetInfos.begin(), tilesetInfos.end(), tilesetInfo) == tilesetInfos.end())
                             {
-                                tilesetInfos.push_back(tilesetInfo);
+                                tilesetInfos.pushBack(tilesetInfo);
                             }
                         }
                     }
@@ -234,7 +234,7 @@ void FastTMXLayer::updateTiles(const Rect& culledRect)
 {
 	Rect visibleTiles        = Rect(culledRect.origin, culledRect.size * _director->getContentScaleFactor());
 	Vec2 mapTileSize         = CC_SIZE_PIXELS_TO_POINTS(_mapTileSize);
-	Vec2 tileSize            = CC_SIZE_PIXELS_TO_POINTS(_tileSets[0]->_tileSize);
+	Vec2 tileSize            = CC_SIZE_PIXELS_TO_POINTS(_tileSets.at(0)->_tileSize);
 	Mat4 nodeToTileTransform = _tileToNodeTransform.getInversed();
 	
 	//visibleTiles.origin = Vec2(visibleTiles.origin.x / mapTileSize.x, visibleTiles.origin.y / mapTileSize.y);
@@ -363,7 +363,7 @@ void FastTMXLayer::setupTiles()
 {
 	// Optimization: quick hack that sets the image size on the tileset
 	for (unsigned int i = 0; i < _textures.size(); ++i) {
-		_tileSets[i]->_imageSize = _textures[i]->getContentSize();
+		_tileSets.at(i)->_imageSize = _textures[i]->getContentSize();
 	}
 
 	// By default all the tiles are aliased
@@ -643,7 +643,7 @@ void FastTMXLayer::updateTotalQuads()
 				
 
 				
-				Vec2 tileSize = CC_SIZE_PIXELS_TO_POINTS(_tileSets[textureIndex]->_tileSize);
+				Vec2 tileSize = CC_SIZE_PIXELS_TO_POINTS(_tileSets.at(textureIndex)->_tileSize);
 
 				
 				
@@ -721,8 +721,8 @@ void FastTMXLayer::updateTotalQuads()
 				}
 				
 				// texcoords
-				Vec2 texSize  = _tileSets[textureIndex]->_imageSize;
-				Rect tileTexture = _tileSets[textureIndex]->getRectForGID(tileGID);
+				Vec2 texSize  = _tileSets.at(textureIndex)->_imageSize;
+				Rect tileTexture = _tileSets.at(textureIndex)->getRectForGID(tileGID);
 				left             = (tileTexture.origin.x / texSize.width);
 				right            = left + (tileTexture.size.width / texSize.width);
 				bottom           = (tileTexture.origin.y / texSize.height);
@@ -806,7 +806,7 @@ Sprite* FastTMXLayer::getTileAt(const Vec2& tileCoordinate)
 			int textureIndex = getTextureIndexFromGid(gid);
 
 			// tile not created yet. create it
-			Rect rect = _tileSets[textureIndex]->getRectForGID(gid);
+			Rect rect = _tileSets.at(textureIndex)->getRectForGID(gid);
 			rect      = CC_RECT_PIXELS_TO_POINTS(rect);
 			tile      = Sprite::createWithTexture(_textures[textureIndex], rect);
 			
@@ -1029,7 +1029,7 @@ void FastTMXLayer::setTileGID(int gid, const Vec2& tileCoordinate, TMXTileFlags 
 			int textureIndex = getTextureIndexFromGid(gid);
 
 			Sprite* sprite = it->second.first;
-			Rect rect      = _tileSets[textureIndex]->getRectForGID(gid);
+			Rect rect      = _tileSets.at(textureIndex)->getRectForGID(gid);
 			rect           = CC_RECT_PIXELS_TO_POINTS(rect);
 			
 			sprite->setTextureRect(rect, false, rect.size);

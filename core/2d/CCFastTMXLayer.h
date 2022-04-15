@@ -214,13 +214,14 @@ public:
      *
      * @return Tileset information for the layer.
      */
-    std::vector<TMXTilesetInfo*>& getTileSets() { return _tileSets; }
+
+    const Vector<TMXTilesetInfo*>& getTileSets() { return _tileSets; }
 
     /** Set the tileset information for the layer.
      *
      * @param info The new tileset information for the layer.
      */
-    void setTileSets(std::vector<TMXTilesetInfo*> infos)
+    void setTileSets(Vector<TMXTilesetInfo*> infos)
     {
 		for(auto info : infos){
 			CC_SAFE_RETAIN(info);
@@ -363,7 +364,7 @@ protected:
 	std::vector<Texture2D*> _textures;
 	
 	/** Tileset information for the layer */
-	std::vector<TMXTilesetInfo*> _tileSets;
+    Vector<TMXTilesetInfo*> _tileSets;
 
 
     /** container for sprite children. map<index, pair<sprite, gid> > */

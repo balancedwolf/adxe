@@ -271,17 +271,14 @@ target_include_directories(fmt ${FMT_SYSTEM_HEADERS_ATTRIBUTE} PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:${FMT_INC_DIR}>)
 
-set(FMT_DEBUG_POSTFIX d CACHE STRING "Debug library postfix.")
-
 set_target_properties(fmt PROPERTIES
-  VERSION ${FMT_VERSION} SOVERSION ${CPACK_PACKAGE_VERSION_MAJOR}
-  DEBUG_POSTFIX "${FMT_DEBUG_POSTFIX}")
+  VERSION ${FMT_VERSION} SOVERSION ${CPACK_PACKAGE_VERSION_MAJOR})
 
 # Set FMT_LIB_NAME for pkg-config fmt.pc. We cannot use the OUTPUT_NAME target
 # property because it's not set by default.
 set(FMT_LIB_NAME fmt)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-  set(FMT_LIB_NAME ${FMT_LIB_NAME}${FMT_DEBUG_POSTFIX})
+  set(FMT_LIB_NAME ${FMT_LIB_NAME})
 endif ()
 
 if (BUILD_SHARED_LIBS)

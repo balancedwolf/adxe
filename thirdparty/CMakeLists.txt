@@ -127,7 +127,6 @@ if(AX_WITH_CHIPMUNK)
 endif(AX_WITH_CHIPMUNK)
 if(AX_WITH_FREETYPE)
     set(FT_WITH_ZLIB ON CACHE BOOL "Use system zlib instead of internal library." FORCE)
-    set(DISABLE_FORCE_DEBUG_POSTFIX ON CACHE BOOL "" FORCE)
     add_subdirectory(freetype)
     target_include_directories(thirdparty PUBLIC "freetype/include")
     target_link_libraries(thirdparty freetype)
@@ -226,11 +225,13 @@ if(AX_ENABLE_EXT_LUA)
     set_property(TARGET thirdparty APPEND PROPERTY 
         CC_LUA_DEPEND ${AX_LUA_ENGINE} tolua lua-cjson
     )
-endif(AX_ENABLE_EXT_LUA)
-
 if(AX_WITH_LUACPP)
     add_subdirectory(luacpp)
 endif()
+    
+endif(AX_ENABLE_EXT_LUA)
+
+
 
 if(NOT LINUX)
     if(AX_WITH_CURL)

@@ -222,17 +222,15 @@ if(AX_ENABLE_EXT_LUA)
     add_subdirectory(lua/${AX_LUA_ENGINE})
     add_subdirectory(lua/tolua)
     add_subdirectory(lua/lua-cjson)
-    
-    if(AX_WITH_LUACPP)
-        add_subdirectory(luacpp)
-    endif()
 
     set_property(TARGET thirdparty APPEND PROPERTY 
         CC_LUA_DEPEND ${AX_LUA_ENGINE} tolua lua-cjson
     )
-    
-
 endif(AX_ENABLE_EXT_LUA)
+
+if(AX_WITH_LUACPP)
+    add_subdirectory(luacpp)
+endif()
 
 if(NOT LINUX)
     if(AX_WITH_CURL)

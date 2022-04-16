@@ -536,7 +536,7 @@ void AudioEngineImpl::setPitch(int audioID,float pitch)
 		auto error = alGetError();
 		if (error != AL_NO_ERROR)
 		{
-			printf("%s: audio id = %d, error = %x\n", __PRETTY_FUNCTION__,audioID,error);
+			printf("%s: audio id = %d, error = %x\n",audioID,error);
 		}
 	}
 }

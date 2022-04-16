@@ -15,10 +15,10 @@ bool GRoot::_soundEnabled = true;
 float GRoot::_soundVolumeScale = 1.0f;
 int GRoot::contentScaleLevel = 0;
 
-GRoot* GRoot::create(Scene* scene, int zOrder)
+GRoot* GRoot::create(cocos2d::Node* root, int zOrder)
 {
     GRoot* pRet = new GRoot();
-    if (pRet->initWithScene(scene, zOrder))
+    if (pRet->initWithRootNode(root, zOrder))
     {
         pRet->autorelease();
         return pRet;
@@ -508,7 +508,7 @@ void GRoot::onTouchEvent(int eventType)
 
 void GRoot::handlePositionChanged()
 {
-    _displayObject->setPosition(0, _size.height);
+    _displayObject->setPosition(0, 0);
 }
 
 void GRoot::onEnter()
@@ -524,7 +524,7 @@ void GRoot::onExit()
         _inst = nullptr;
 }
 
-bool GRoot::initWithScene(cocos2d::Scene* scene, int zOrder)
+bool GRoot::initWithRootNode(cocos2d::Node* rootNode, int zOrder)
 {
     if (!GComponent::init())
         return false;
@@ -539,8 +539,14 @@ bool GRoot::initWithScene(cocos2d::Scene* scene, int zOrder)
     _windowSizeListener = Director::getInstance()->getEventDispatcher()->addCustomEventListener(GLViewImpl::EVENT_WINDOW_RESIZED, CC_CALLBACK_0(GRoot::onWindowSizeChanged, this));
 #endif
     onWindowSizeChanged();
+	
+	if(dynamic_cast<cocos2d::Scene*>(rootNode)){
+		_displayObject->setAnchorPoint(cocos2d::Vec2(0, 0));
+	} else {
+		_displayObject->setAnchorPoint(cocos2d::Vec2(0.5f, 0.5f));
+	}
 
-    scene->addChild(_displayObject, zOrder);
+    rootNode->addChild(_displayObject, zOrder);
 
     return true;
 }

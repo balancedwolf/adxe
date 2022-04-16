@@ -41,6 +41,7 @@ public:
     void setShrinkOnly(bool value);
 
     const cocos2d::Size& getContentSize();
+	void setContentSize(const cocos2d::Size& size);
 
     cocos2d::Color3B getColor() const;
     void setColor(const cocos2d::Color3B& value);

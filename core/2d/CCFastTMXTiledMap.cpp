@@ -102,7 +102,7 @@ FastTMXLayer* FastTMXTiledMap::parseLayer(TMXLayerInfo* layerInfo, TMXMapInfo* m
 	FastTMXLayer* layer = FastTMXLayer::create(layerInfo, mapInfo);
 	
 	// tell the layerinfo to release the ownership of the tiles map.
-	layerInfo->_ownTiles = true;
+	layerInfo->_ownTiles = false;
 	layer->setupTiles();
 	
 	return layer;

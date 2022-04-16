@@ -108,6 +108,11 @@ const cocos2d::Size & GLoader::getContentSize()
     return _content->getContentSize();
 }
 
+void GLoader::setContentSize(const cocos2d::Size& size){
+	sourceSize = size;
+	updateLayout();
+}
+
 cocos2d::Color3B GLoader::getColor() const
 {
     return _content->getColor();

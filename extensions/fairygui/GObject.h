@@ -163,7 +163,7 @@ public:
     bool _underConstruct;
     bool _gearLocked;
     bool _alignToBL;
-
+	
 protected:
     GComponent* _parent;
     cocos2d::Node* _displayObject;

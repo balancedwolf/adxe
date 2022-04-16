@@ -18,7 +18,7 @@ public:
     GRoot();
     virtual ~GRoot();
 
-    static GRoot* create(cocos2d::Scene* scene, int zOrder = 1000);
+    static GRoot* create(cocos2d::Node* rootNode, int zOrder = 1000);
     static GRoot* getInstance() { return _inst; }
 
     void showWindow(Window* win);
@@ -70,7 +70,7 @@ protected:
     virtual void onExit() override;
 
 private:
-    bool initWithScene(cocos2d::Scene* scene, int zOrder);
+    bool initWithRootNode(cocos2d::Node* rootNode, int zOrder);
     void onWindowSizeChanged();
     void createModalLayer();
     void adjustModalLayer();

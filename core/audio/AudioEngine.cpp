@@ -172,7 +172,7 @@ bool AudioEngine::lazyInit()
     return true;
 }
 
-AUDIO_ID AudioEngine::play2d(std::string_view filePath, bool loop, float volume, const AudioProfile* profile)
+AUDIO_ID AudioEngine::play2d(std::string_view filePath, bool loop, float volume, float pitch, const AudioProfile* profile)
 {
     AUDIO_ID ret = AudioEngine::INVALID_AUDIO_ID;
 
@@ -235,7 +235,7 @@ AUDIO_ID AudioEngine::play2d(std::string_view filePath, bool loop, float volume,
             volume = 1.0f;
         }
 
-        ret = _audioEngineImpl->play2d(filePath, loop, volume);
+        ret = _audioEngineImpl->play2d(filePath, loop, volume, pitch);
         if (ret != INVALID_AUDIO_ID)
         {
             _audioPathIDMap[filePath.data()].push_back(ret);
@@ -289,6 +289,25 @@ void AudioEngine::setVolume(AUDIO_ID audioID, float volume)
         }
     }
 }
+
+void AudioEngine::setPitch(int audioID, float pitch)
+{
+	auto it = _audioIDInfoMap.find(audioID);
+	if (it != _audioIDInfoMap.end()){
+		if (pitch < 0.5f) {
+			pitch = 0.5f;
+		}
+		else if (pitch > 2.0f){
+			pitch = 2.0f;
+		}
+		
+		if (it->second.pitch != pitch){
+			_audioEngineImpl->setPitch(audioID, pitch);
+			it->second.pitch = pitch;
+		}
+	}
+}
+
 
 void AudioEngine::pause(AUDIO_ID audioID)
 {

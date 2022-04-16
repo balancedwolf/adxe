@@ -261,7 +261,7 @@ void GObject::setPivot(float xv, float yv, bool asAnchor)
         _pivot.set(xv, yv);
         _pivotAsAnchor = asAnchor;
         if (_displayObject != nullptr)
-            _displayObject->setAnchorPoint(Vec2(_pivot.x, 1 - _pivot.y));
+            _displayObject->setAnchorPoint(Vec2(_pivot.x, _pivot.y));
         handlePositionChanged();
     }
 }

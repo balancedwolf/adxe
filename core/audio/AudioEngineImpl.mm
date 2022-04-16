@@ -437,7 +437,7 @@ AudioCache* AudioEngineImpl::preload(std::string_view filePath, std::function<vo
     return audioCache;
 }
 
-AUDIO_ID AudioEngineImpl::play2d(std::string_view filePath, bool loop, float volume)
+AUDIO_ID AudioEngineImpl::play2d(std::string_view filePath, bool loop, float volume, float pitch)
 {
     if (s_ALDevice == nullptr)
     {
@@ -459,6 +459,7 @@ AUDIO_ID AudioEngineImpl::play2d(std::string_view filePath, bool loop, float vol
     player->_alSource = alSource;
     player->_loop     = loop;
     player->_volume   = volume;
+	player->_pitch = pitch;
 
     auto audioCache = preload(filePath, nullptr);
     if (audioCache == nullptr)
@@ -521,6 +522,23 @@ ALuint AudioEngineImpl::findValidSource()
     }
 
     return sourceId;
+}
+
+void AudioEngineImpl::setPitch(int audioID,float pitch)
+{
+	auto& player = _audioPlayers[audioID];
+	player->_pitch = pitch;
+
+	if (player->_ready)
+	{
+		alSourcef(_audioPlayers[audioID]->_alSource, AL_PITCH, pitch);
+		
+		auto error = alGetError();
+		if (error != AL_NO_ERROR)
+		{
+			printf("%s: audio id = %d, error = %x\n", __PRETTY_FUNCTION__,audioID,error);
+		}
+	}
 }
 
 void AudioEngineImpl::setVolume(AUDIO_ID audioID, float volume)
